@@ -23,7 +23,8 @@ class Application(Tk):
         self.frames = {}
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
-                  Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU):
+                  Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
+                  ViewApplications, ViewTabooWords):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -362,59 +363,52 @@ class SuperUserPage(Frame):
         Frame.__init__(self, parent, bg='yellow')
 
         fr = Frame(self)
+        rd_Frame = Frame(self) 
 
         Lab = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
         Lab.pack(padx=15, pady=5)
 
-        Lab0 = Label(self, text='What would you like to do?', font="Times 16 bold")
+        Lab0 = Label(fr, text='What would you like to do?', font="Times 16 bold")
         Lab0.pack(padx=15, pady=6)
 
-        # Providing buttons for various SU options:
+        button0 = Button(fr, text='Documents')            # Providing buttons for various SU options
+        button0.pack(side=TOP, padx=5, pady=5)
 
-        button_0 = Button(fr, text='Your Documents', command=lambda: controller.show_frame(Your_Documents_SU))
-        button_0.pack(side=TOP, padx=4, pady=5)
+        button1 = Button(fr, text='View OU Applications', command=lambda: controller.show_frame(ViewApplications))
+        button1.pack(side=TOP, padx=6, pady=5)
 
-        button1 = Button(fr, text='See taboo words')
-        button1.pack(side=TOP, padx=5, pady=5)
+        button2 = Button(fr, text='View Complaints')
+        button2.pack(side=TOP, padx=7, pady=5)
 
-        button2 = Button(fr, text='Unlock Locked documents')
-        button2.pack(side=TOP, padx=6, pady=5)
+        button3 = Button(fr, text='View Taboo Words', command=lambda: controller.show_frame(ViewTabooWords))
+        button3.pack(side=TOP, padx=8, pady=5)
 
-        button3 = Button(fr, text='Update Membership')
-        button3.pack(side=TOP, padx=7, pady=5)
+        button4 = Button(fr, text='Remove OU\'s')
+        button4.pack(side=TOP, padx=9, pady=5)
 
-        button4 = Button(fr, text='Process Complaints of OUs')
-        button4.pack(side=TOP, padx=8, pady=5)
+        button5 = Button(fr, text='Search OUs')
+        button5.pack(side=TOP, padx=10, pady=5)
 
-        button5 = Button(fr, text='Create new document', command=self.create_new_document_window)
-        button5.pack(side=TOP, padx=9, pady=5)
+        button6 = Button(fr, text='View invitations')
+        button6.pack(side=TOP, padx=11, pady=5)
 
-        button6 = Button(fr, text='Invite OUs')
-        button6.pack(side=TOP, padx=10, pady=5)
-
-        button7 = Button(fr, text='Accept/Deny invitations')
-        button7.pack(side=TOP, padx=11, pady=5)
-
-        button8 = Button(fr, text='Get info about other OUs')
-        button8.pack(side=TOP, padx=12, pady=5)
-
-        Lab1 = Label(fr, text='Recent Documents: ', font="Times 25 bold")
+        Lab1 = Label(rd_Frame, text='Recent Documents: ', font="Times 25 bold")
         Lab1.pack(side=TOP, padx=14, pady=5)
 
-        button8 = Button(fr, text='Document 1')
+        button8 = Button(rd_Frame, text='Document 1')
         button8.pack(side=LEFT, padx=17, pady=5)
 
-        button9 = Button(fr, text='Document 2')
+        button9 = Button(rd_Frame, text='Document 2')
         button9.pack(side=LEFT, padx=16, pady=5)
 
-        button9 = Button(fr, text='Document 3')
+        button9 = Button(rd_Frame, text='Document 3')
         button9.pack(side=LEFT, padx=15, pady=5)
 
-        button10 = Button(self, text='Add Profile Picture')
+        button10 = Button(self, text='Change Profile Picture')
         button10.pack(anchor='nw', padx=5, pady=0)
-        button10.config(height='6', width='6')
 
         fr.pack(padx=100, pady=19)
+        rd_Frame.pack(padx = 101, pady = 19)
 
         button = Button(self, text="Visit Login User Page", command=lambda: controller.show_frame(LoginPage))
         button.pack()
@@ -443,6 +437,38 @@ class SuperUserPage(Frame):
             open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
             self.cnd_window.destroy()
 
+class ViewApplications(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        va_label = Label(self, text= "Choose an application")
+        va_label.pack(side=TOP)
+        va_apps = ["APP 1", "APP 2", "APP 3"]
+        self.va_var = StringVar(self)
+        self.va_var.set(va_apps[0])
+        va_om = OptionMenu(self, self.va_var, *va_apps)
+        va_om.pack(side=TOP)
+        va_ok_button = Button(self, text='ok')
+        va_ok_button.pack(side=TOP)
+        va_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        va_cancel_button.pack(side=TOP)
+
+class ViewTabooWords(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        vtw_label = Label(self, text= "Taboo Words")
+        vtw_label.pack(side=TOP)
+        vtw_list = ["Fork", "Beach", "Damn"]
+        vtw_lb = Listbox(self)
+        vtw_lb.pack(side=TOP)
+        for item in vtw_list:
+            vtw_lb.insert(END, item)
+        vtw_add_button = Button(self, text='Add')
+        vtw_add_button.pack(side=TOP)
+        vtw_remove_button = Button(self, text='Remove')
+        vtw_remove_button.pack(side=TOP)
+        vtw_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        vtw_cancel_button.pack(side=TOP)
 
 app = Application()
 app.mainloop()
