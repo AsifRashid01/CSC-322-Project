@@ -22,7 +22,8 @@ class Application(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage, Your_Documents):
+        for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
+                  Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -66,9 +67,12 @@ class LoginPage(Frame):
         self.entry2 = Entry(self, bd=5)
         self.entry2.pack(padx=15, pady=7)
 
-        btn = Button(self, text='Check Login', command=self.RegisteredUserLogin)    # Button to click to check login credentials
 
-        btn2 = Button(self, text='Login as Guest User', command=self.GuestUserLogin)      # Button to log in as a guest
+        # Button to click to check login credentials
+        btn = Button(self, text='Check Login', command=self.RegisteredUserLogin)
+        # Button to log in as a guest
+        btn2 = Button(self, text='Login as Guest User', command=self.GuestUserLogin)
+
 
         btn.pack(padx=5)
         btn2.pack(padx=6)
@@ -101,20 +105,16 @@ class GuestUserPage(Frame):
         Labe0 = Label(self, text='What would you like to do?', font="Times 16 bold")
         Labe0.pack(padx=15, pady=5)
 
-        but0 = Button(fram, text='Read open documents')          # Providing buttons for various GU options
+        # Providing buttons for various GU options:
+
+        but0 = Button(fram, text='Documents', command=lambda: controller.show_frame(Documents_GU))
         but0.pack(side=TOP, padx=5, pady=5)
 
-        but1 = Button(fram, text='Retrieve old versions')
-        but1.pack(side=TOP, padx=6, pady=5)
+        but1 = Button(fram, text='Send Taboo word suggestions to SU', command=lambda: controller.show_frame(Taboo_Word_Suggestions_GU))
+        but1.pack(side=TOP, padx=7, pady=5)
 
-        but2 = Button(fram, text='Complain about documents')
+        but2 = Button(fram, text='Apply to be an OU', command=self.Apply_GU_to_OU)
         but2.pack(side=TOP, padx=7, pady=5)
-
-        but3 = Button(fram, text='Send Taboo word suggestions to SU')
-        but3.pack(side=TOP, padx=7, pady=5)
-
-        but4 = Button(fram, text='Apply to be OU', command=self.Apply_GU_to_OU)
-        but4.pack(side=TOP, padx=7, pady=5)
 
         fram.pack(padx=100, pady=19)
 
@@ -127,15 +127,74 @@ class GuestUserPage(Frame):
         agu_label1 = Label(agu_fram, text="Enter first name: ")
         agu_label1.pack(side=TOP)
         self.agu_entry1 = Entry(agu_fram, bd=5)
-        self.agu_entry1.pack(side=RIGHT)
+        self.agu_entry1.pack(side=TOP)
         agu_label2 = Label(agu_fram, text="Enter last name: ")
         agu_label2.pack(side=TOP)
         self.agu_entry2 = Entry(agu_fram, bd=5)
-        self.agu_entry2.pack(side=RIGHT)
+        self.agu_entry2.pack(side=TOP)
+        agu_label3 = Label(agu_fram, text="Enter email: ")
+        agu_label3.pack(side=TOP)
+        self.agu_entry3 = Entry(agu_fram, bd=5)
+        self.agu_entry3.pack(side=TOP)
+        agu_label4 = Label(agu_fram, text="Technical Interest Field: ")
+        agu_label4.pack(side=TOP)
+        agu_options = ["Software Design", "Design Reporting", "Application Development", "Information Systems"]
+        self.variable = StringVar(agu_fram)
+        self.variable.set(agu_options[0])
+        w = OptionMenu(agu_fram, self.variable, *agu_options)
+        w.pack(side=TOP)
         agu_button = Button(agu_fram, text='Submit')
-        agu_button.pack(side=TOP)
+        agu_button.pack(side=BOTTOM)
         agu_fram.pack()
         agu_window.mainloop()
+
+
+class Documents_GU(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        back_button = Button(self, text="Back to GU Home Page", command=lambda: controller.show_frame(GuestUserPage))
+        back_button.pack(side=BOTTOM)
+        yd_label = Label(self, text= "Choose a document")
+        yd_label.pack(side=TOP)
+        yd_options = ["Doc 1", "Doc 2", "Doc 3"]
+        self.variable = StringVar(self)
+        self.variable.set(yd_options[0])
+        w = OptionMenu(self, self.variable, *yd_options)
+        w.pack(side=TOP)
+        button1 = Button(self, text='OK', command=self.doc_selection)
+        button1.pack(side=TOP)
+
+    def doc_selection(self):
+        print(self.variable.get())
+        yd_label2 = Label(self, text="What would you like to do?")
+        yd_label2.pack(side=TOP)
+        yd_options2 = ["Read Doc", "Retrieve older version of Doc", "File complaint about Doc"]
+        variable2 = StringVar(self)
+        variable2.set(yd_options2[0])
+        w = OptionMenu(self, variable2, *yd_options2)
+        w.pack(side=TOP)
+
+        button2 = Button(self, text='submit')
+        button2.pack(side=TOP)
+
+
+class Taboo_Word_Suggestions_GU(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(GuestUserPage))
+        cancel_button.pack(side=BOTTOM)
+        tw_label = Label(self, text="** You are about to send a list of taboo words ** ")
+        tw_label.pack(side=TOP)
+
+        tw_label1 = Label(self, text="Enter taboo words: ")
+        tw_label1.pack(side=TOP)
+        self.tw_entry1 = Entry(bd=5)
+        self.tw_entry1.pack(side=TOP)
+
+        button2 = Button(self, text='submit')
+        button2.pack(side=TOP)
 
 
 class OrdinaryUserPage(Frame):
@@ -150,10 +209,12 @@ class OrdinaryUserPage(Frame):
         Labe0 = Label(self, text='What would you like to do?', font="Times 16 bold")
         Labe0.pack(padx=15, pady=5)
 
-        but_0 = Button(fra, text='Your Documents', command=lambda: controller.show_frame(Your_Documents))
+        # Providing buttons for various OU options:
+
+        but_0 = Button(fra, text='Your Documents', command=lambda: controller.show_frame(Your_Documents_OU))
         but_0.pack(side=TOP, padx=4, pady=5)
 
-        but0 = Button(fra, text='Create new document', command=self.create_new_document_window)         # Providing buttons for various OU options
+        but0 = Button(fra, text='Create new document', command=self.create_new_document_window)
         but0.pack(side=TOP, padx=5, pady=5)
 
         but1 = Button(fra, text='Invite OUs', command=self.invite_ou_window)
@@ -189,7 +250,6 @@ class OrdinaryUserPage(Frame):
         button = Button(self, text="Visit Login User Page", command=lambda: controller.show_frame(LoginPage))
         button.pack()
 
-
     def create_new_document_window(self):
         self.cnd_window = Tk()
         cnd_fram = Frame(self.cnd_window)
@@ -200,7 +260,7 @@ class OrdinaryUserPage(Frame):
         cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
         cnd_button.pack(side = LEFT)
         cnd_fram.pack()
-        self.cnd_window.mainloop()
+        cnd_window.mainloop()
 
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
@@ -210,9 +270,7 @@ class OrdinaryUserPage(Frame):
             #python 3:
             messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
         else:
-            #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            self.cnd_window.destroy()
+            open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
 
     def invite_ou_window(self):
 
@@ -231,10 +289,12 @@ class OrdinaryUserPage(Frame):
         iou_window.mainloop()
 
 
-class Your_Documents(Frame):
+class Your_Documents_OU(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
 
+        back_button = Button(self, text="Back to OU Home Page", command=lambda: controller.show_frame(OrdinaryUserPage))
+        back_button.pack(side=BOTTOM)
         yd_label = Label(self, text= "Choose Document")
         yd_label.pack(side=TOP)
         yd_options = ["Doc 1", "Doc 2", "Doc 3"]
@@ -250,7 +310,7 @@ class Your_Documents(Frame):
         yd_label2 = Label(self, text="What would you like to do?")
         yd_label2.pack(side=TOP)
         yd_options2 = ["Read Doc", "Edit Doc", "Send suggestions (taboo words)", "retrieve older versions",
-                      "Invite other OUs", "change privacy settings"]
+                       "Invite other OUs", "change privacy settings"]
         variable2 = StringVar(self)
         variable2.set(yd_options2[0])
         w = OptionMenu(self, variable2, *yd_options2)
@@ -258,6 +318,43 @@ class Your_Documents(Frame):
 
         button2 = Button(self, text='submit')
         button2.pack(side=TOP)
+
+        button3 = Button(self, text='go back')
+        button3.pack(side=TOP)
+
+
+class Your_Documents_SU(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        back_button = Button(self, text="Back to SU Home Page", command=lambda: controller.show_frame(SuperUserPage))
+        back_button.pack(side=BOTTOM)
+        yd_label = Label(self, text= "Choose Document")
+        yd_label.pack(side=TOP)
+        yd_options = ["Doc 1", "Doc 2", "Doc 3"]
+        self.variable = StringVar(self)
+        self.variable.set(yd_options[0])
+        w = OptionMenu(self, self.variable, *yd_options)
+        w.pack(side=TOP)
+        button1 = Button(self, text='ok', command= self.doc_selection)
+        button1.pack(side=TOP)
+
+    def doc_selection(self):
+        print(self.variable.get())
+        yd_label2 = Label(self, text="What would you like to do?")
+        yd_label2.pack(side=TOP)
+        yd_options2 = ["Read Doc", "Edit Doc", "Send suggestions (taboo words)", "retrieve older versions",
+                       "Invite other OUs", "change privacy settings"]
+        variable2 = StringVar(self)
+        variable2.set(yd_options2[0])
+        w = OptionMenu(self, variable2, *yd_options2)
+        w.pack(side=TOP)
+
+        button2 = Button(self, text='submit')
+        button2.pack(side=TOP)
+
+        button3 = Button(self, text='go back')
+        button3.pack(side=TOP)
 
 
 class SuperUserPage(Frame):
@@ -272,29 +369,34 @@ class SuperUserPage(Frame):
         Lab0 = Label(self, text='What would you like to do?', font="Times 16 bold")
         Lab0.pack(padx=15, pady=6)
 
-        button0 = Button(fr, text='See taboo words')            # Providing buttons for various SU options
-        button0.pack(side=TOP, padx=5, pady=5)
+        # Providing buttons for various SU options:
 
-        button1 = Button(fr, text='Unlock Locked documents')
-        button1.pack(side=TOP, padx=6, pady=5)
+        button_0 = Button(fr, text='Your Documents', command=lambda: controller.show_frame(Your_Documents_SU))
+        button_0.pack(side=TOP, padx=4, pady=5)
 
-        button2 = Button(fr, text='Update Membership')
-        button2.pack(side=TOP, padx=7, pady=5)
+        button1 = Button(fr, text='See taboo words')
+        button1.pack(side=TOP, padx=5, pady=5)
 
-        button3 = Button(fr, text='Process Complaints of OUs')
-        button3.pack(side=TOP, padx=8, pady=5)
+        button2 = Button(fr, text='Unlock Locked documents')
+        button2.pack(side=TOP, padx=6, pady=5)
 
-        button4 = Button(fr, text='Create new document', command=self.create_new_document_window)
-        button4.pack(side=TOP, padx=9, pady=5)
+        button3 = Button(fr, text='Update Membership')
+        button3.pack(side=TOP, padx=7, pady=5)
 
-        button5 = Button(fr, text='Invite OUs')
-        button5.pack(side=TOP, padx=10, pady=5)
+        button4 = Button(fr, text='Process Complaints of OUs')
+        button4.pack(side=TOP, padx=8, pady=5)
 
-        button6 = Button(fr, text='Accept/Deny invitations')
-        button6.pack(side=TOP, padx=11, pady=5)
+        button5 = Button(fr, text='Create new document', command=self.create_new_document_window)
+        button5.pack(side=TOP, padx=9, pady=5)
 
-        button7 = Button(fr, text='Get info about other OUs')
-        button7.pack(side=TOP, padx=12, pady=5)
+        button6 = Button(fr, text='Invite OUs')
+        button6.pack(side=TOP, padx=10, pady=5)
+
+        button7 = Button(fr, text='Accept/Deny invitations')
+        button7.pack(side=TOP, padx=11, pady=5)
+
+        button8 = Button(fr, text='Get info about other OUs')
+        button8.pack(side=TOP, padx=12, pady=5)
 
         Lab1 = Label(fr, text='Recent Documents: ', font="Times 25 bold")
         Lab1.pack(side=TOP, padx=14, pady=5)
