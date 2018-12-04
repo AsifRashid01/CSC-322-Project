@@ -4,7 +4,9 @@
 #python 3:
 from tkinter import *                                                      # Using Tkinter for GUI properties
 from tkinter import messagebox                                             # Importing MessageBox module
-
+import sys
+import os
+import json
 # from tkinter import ttk
 LARGE_FONT = ("Verdana", 12)
 
@@ -24,8 +26,7 @@ class Application(Tk):
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
                   Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
-
-                  ViewApplications, ViewTabooWords, Apply_GU_to_OU):
+                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, CreateGuestUserAccount):
 
 
 
@@ -76,7 +77,7 @@ class LoginPage(Frame):
         # Button to click to check login credentials
         btn = Button(self, text='Check Login', command=self.RegisteredUserLogin)
         # Button to log in as a guest
-        btn2 = Button(self, text='Login as Guest User', command=self.GuestUserLogin)
+        btn2 = Button(self, text='Create Guest User Account', command=lambda: self.controller.show_frame(CreateGuestUserAccount))
 
 
         btn.pack(padx=5)
@@ -89,6 +90,8 @@ class LoginPage(Frame):
             self.controller.show_frame(SuperUserPage)
         elif username == 'o' and password == 'o':
             self.controller.show_frame(OrdinaryUserPage)
+        elif  username == 'g' and password == 'g':
+            self.controller.show_frame(GuestUserPage)
         else:
             #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
             #python 3:
@@ -97,6 +100,44 @@ class LoginPage(Frame):
     def GuestUserLogin(self):
         self.controller.show_frame(GuestUserPage)
 
+class CreateGuestUserAccount(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='red')
+
+        self.controller = controller
+
+        CGUA_Label0 = Label(self, text='Create Guest User Account Page', font="Times 16 bold")
+        CGUA_Label0.pack(padx=15, pady=5)
+
+        CGUA_Label1 = Label(self, text='Username:')
+        CGUA_Label1.pack(padx=15, pady=5)
+
+        self.CGUA_entry1 = Entry(self, bd=5)
+        self.CGUA_entry1.pack(padx=15, pady=5)
+
+        CGUA_Label2 = Label(self, text='Password:')
+        CGUA_Label2.pack(padx=15, pady=6)
+
+        self.CGUA_entry2 = Entry(self, bd=5)
+        self.CGUA_entry2.pack(padx=15, pady=7)
+
+        CGUA_btn1 = Button(self, text='Create Account', command=self.checkUniqueUsername)
+        CGUA_btn1.pack(padx=5)
+
+        CGUA_btn2 = Button(self, text='Cancel', command=lambda: self.controller.show_frame(LoginPage))
+        CGUA_btn2.pack(padx=6)
+
+    def checkUniqueUsername(self):
+        username = self.CGUA_entry1.get()
+        password = self.CGUA_entry2.get()
+
+        with open('GU.json', 'r+') as f:
+            GU_dict = json.load(f)
+            if username in GU_dict:
+                messagebox.showerror('Error', 'Username already taken. Try again!')
+            else:
+                GU_dict.update({username: password})
+                json.dump(GU_dict,f, sort_keys=True)
 
 class GuestUserPage(Frame):
     def __init__(self, parent, controller):
@@ -166,8 +207,8 @@ class Documents_GU(Frame):
         back_button.pack(side=BOTTOM)
         yd_label = Label(self, text= "Choose a document")
         yd_label.pack(side=TOP)
-        import os
-        yd_options = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+        # yd_options = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+        yd_options = os.listdir(sys.path[0] + "/Document")
         self.variable = StringVar(self)
         self.variable.set(yd_options[0])
         w = OptionMenu(self, self.variable, *yd_options)
@@ -191,7 +232,8 @@ class Documents_GU(Frame):
     def doc_decision(self):
 
         # self.button2['state'] = 'disabled'
-        F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
+        # F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
+        F = open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
         a = F.read()
         print (a)
 
@@ -305,12 +347,13 @@ class OrdinaryUserPage(Frame):
 
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
-        import os
-        file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+        file_names = os.listdir(sys.path[0] + "/Document")
+        # file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
         if new_file_name in file_names:
             #python 3:
             messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
         else:
+
             open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
 
     def invite_ou_window(self):
@@ -469,9 +512,8 @@ class SuperUserPage(Frame):
 
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
-        import os
         #file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
-        file_names = os.listdir("C:/Users/saddi/Desktop/CSC-322-Project/Document")
+        file_names = os.listdir(sys.path[0] + "/Document")
         if new_file_name in file_names:
             print(new_file_name)
         else:
