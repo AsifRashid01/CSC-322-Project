@@ -204,7 +204,7 @@ class Documents_GU(Frame):
 
         F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
         print F.read()
-        
+
 '''
 
 
@@ -221,11 +221,9 @@ class Taboo_Word_Suggestions_GU(Frame):
 
         tw_label1 = Label(self, text="Enter taboo words (one word per line): ")
         tw_label1.pack(side=TOP)
-<<<<<<< HEAD
-        self.tw_entry1 = Entry(self, bd=5)
-=======
+
         self.tw_entry1 = Text(self, bd=5)
->>>>>>> bd34f96ea149a79b2786151b5536bd890769a72c
+
         self.tw_entry1.pack(side=TOP)
 
         button2 = Button(self, text='submit', command=self.Retrieve_Taboo_words)
@@ -405,10 +403,7 @@ class SuperUserPage(Frame):
 
         fr = Frame(self)
         rd_Frame = Frame(self)
-<<<<<<< HEAD
-=======
 
->>>>>>> bd34f96ea149a79b2786151b5536bd890769a72c
 
         Lab = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
         Lab.pack(padx=15, pady=5)
