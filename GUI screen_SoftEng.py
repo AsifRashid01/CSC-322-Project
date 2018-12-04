@@ -167,7 +167,7 @@ class Documents_GU(Frame):
         yd_label = Label(self, text= "Choose a document")
         yd_label.pack(side=TOP)
         import os
-        yd_options = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+        yd_options = os.listdir("C:/Users/Asif/Desktop/Project test/Document")
         self.variable = StringVar(self)
         self.variable.set(yd_options[0])
         w = OptionMenu(self, self.variable, *yd_options)
