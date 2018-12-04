@@ -1,5 +1,9 @@
-from Tkinter import *                             # Using Tkinter for GUI properties
-import tkMessageBox                                            # Importing MessageBox module
+# from Tkinter import *                             # Using Tkinter for GUI properties
+# import tkMessageBox                               # Importing MessageBox module
+
+#python 3:
+from tkinter import *                                                      # Using Tkinter for GUI properties
+from tkinter import messagebox                                             # Importing MessageBox module
 
 # from tkinter import ttk
 LARGE_FONT = ("Verdana", 12)
@@ -20,7 +24,11 @@ class Application(Tk):
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
                   Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
+
                   ViewApplications, ViewTabooWords, Apply_GU_to_OU):
+
+
+
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -64,10 +72,12 @@ class LoginPage(Frame):
         self.entry2 = Entry(self, bd=5)
         self.entry2.pack(padx=15, pady=7)
 
+
         # Button to click to check login credentials
         btn = Button(self, text='Check Login', command=self.RegisteredUserLogin)
         # Button to log in as a guest
         btn2 = Button(self, text='Login as Guest User', command=self.GuestUserLogin)
+
 
         btn.pack(padx=5)
         btn2.pack(padx=6)
@@ -80,7 +90,9 @@ class LoginPage(Frame):
         elif username == 'o' and password == 'o':
             self.controller.show_frame(OrdinaryUserPage)
         else:
-            tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
+            #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
+            #python 3:
+            messagebox.showerror('Error', 'Invalid Login, Please Try Again')
 
     def GuestUserLogin(self):
         self.controller.show_frame(GuestUserPage)
@@ -278,14 +290,14 @@ class OrdinaryUserPage(Frame):
         button.pack()
 
     def create_new_document_window(self):
-        cnd_window = Tk()
-        cnd_fram = Frame(cnd_window)
+        self.cnd_window = Tk()
+        cnd_fram = Frame(self.cnd_window)
         cnd_label = Label(cnd_fram, text= "Enter file name:")
-        cnd_label.pack(side=LEFT)
+        cnd_label.pack(side = LEFT)
         self.cnd_entry = Entry(cnd_fram, bd = 5)
-        self.cnd_entry.pack(side=RIGHT)
+        self.cnd_entry.pack(side = LEFT)
         cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
-        cnd_button.pack(side=RIGHT)
+        cnd_button.pack(side = LEFT)
         cnd_fram.pack()
         cnd_window.mainloop()
 
@@ -294,7 +306,8 @@ class OrdinaryUserPage(Frame):
         import os
         file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
         if new_file_name in file_names:
-            print(new_file_name)
+            #python 3:
+            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
         else:
             open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
 
@@ -389,6 +402,7 @@ class SuperUserPage(Frame):
         fr = Frame(self)
         rd_Frame = Frame(self)
 
+
         Lab = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
         Lab.pack(padx=15, pady=5)
 
@@ -454,12 +468,47 @@ class SuperUserPage(Frame):
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
         import os
-        file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+        #file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+        file_names = os.listdir("C:/Users/saddi/Desktop/CSC-322-Project/Document")
         if new_file_name in file_names:
             print(new_file_name)
         else:
-            open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            self.cnd_window.destroy()
 
+class ViewApplications(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        va_label = Label(self, text= "Choose an application")
+        va_label.pack(side=TOP)
+        va_apps = ["APP 1", "APP 2", "APP 3"]
+        self.va_var = StringVar(self)
+        self.va_var.set(va_apps[0])
+        va_om = OptionMenu(self, self.va_var, *va_apps)
+        va_om.pack(side=TOP)
+        va_ok_button = Button(self, text='ok')
+        va_ok_button.pack(side=TOP)
+        va_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        va_cancel_button.pack(side=TOP)
+
+class ViewTabooWords(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        vtw_label = Label(self, text= "Taboo Words")
+        vtw_label.pack(side=TOP)
+        vtw_list = ["Fork", "Beach", "Damn"]
+        vtw_lb = Listbox(self)
+        vtw_lb.pack(side=TOP)
+        for item in vtw_list:
+            vtw_lb.insert(END, item)
+        vtw_add_button = Button(self, text='Add')
+        vtw_add_button.pack(side=TOP)
+        vtw_remove_button = Button(self, text='Remove')
+        vtw_remove_button.pack(side=TOP)
+        vtw_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        vtw_cancel_button.pack(side=TOP)
 
 class ViewApplications(Frame):
     def __init__(self, parent, controller):
