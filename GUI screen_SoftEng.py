@@ -191,7 +191,7 @@ class Taboo_Word_Suggestions_GU(Frame):
 
         tw_label1 = Label(self, text="Enter taboo words: ")
         tw_label1.pack(side=TOP)
-        self.tw_entry1 = Entry(bd=5)
+        self.tw_entry1 = Entry(self, bd=5)
         self.tw_entry1.pack(side=TOP)
 
         button2 = Button(self, text='submit')
@@ -261,7 +261,7 @@ class OrdinaryUserPage(Frame):
         cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
         cnd_button.pack(side = LEFT)
         cnd_fram.pack()
-        cnd_window.mainloop()
+        self.cnd_window.mainloop()
 
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
@@ -363,7 +363,7 @@ class SuperUserPage(Frame):
         Frame.__init__(self, parent, bg='yellow')
 
         fr = Frame(self)
-        rd_Frame = Frame(self) 
+        rd_Frame = Frame(self)
 
         Lab = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
         Lab.pack(padx=15, pady=5)
