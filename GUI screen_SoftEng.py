@@ -50,6 +50,7 @@ class Application(Tk):
         else:
             Tk.wm_title(self, "DSS")
 
+    current_logged_in_user = None # variable to keep track of a currently logged in user
 
 class LoginPage(Frame):
 
@@ -86,16 +87,45 @@ class LoginPage(Frame):
     def RegisteredUserLogin(self):
         username = self.entry1.get()
         password = self.entry2.get()
-        if username == 's' and password == 's':
-            self.controller.show_frame(SuperUserPage)
-        elif username == 'o' and password == 'o':
-            self.controller.show_frame(OrdinaryUserPage)
-        elif  username == 'g' and password == 'g':
+        
+        try:
+            GU_file = open('GU.json', 'r')
+            GU_dict = json.load(GU_file)
+        except FileNotFoundError:
+            GU_file = open('GU.json', 'w') # create GU.json
+            json.dump({}, GU_file) # and initialize it as empty dictionary
+            GU_dict = {}
+
+        try:
+            OU_file = open('OU.json', 'r')
+            OU_dict = json.load(OU_file)
+        except FileNotFoundError:
+            OU_file = open('OU.json', 'w') # create OU.json
+            json.dump({}, OU_file) # and initialize it as an empty dictionary
+            OU_dict = {}
+
+        if username in GU_dict and password == GU_dict[username] or username == 'g' and password == 'g':
             self.controller.show_frame(GuestUserPage)
+            Application.current_logged_in_user = username
+        elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
+            self.controller.show_frame(OrdinaryUserPage)
+            Application.current_logged_in_user = username
+        elif username == 's' and password == 's':
+            self.controller.show_frame(SuperUserPage)
+            Application.current_logged_in_user = username
         else:
-            #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
-            #python 3:
-            messagebox.showerror('Error', 'Invalid Login, Please Try Again')
+            messagebox.showerror('Error', 'Invalid login information; try again.')
+
+#        if username == 's' and password == 's':
+#            self.controller.show_frame(SuperUserPage)
+#        elif username == 'o' and password == 'o':
+#            self.controller.show_frame(OrdinaryUserPage)
+#        elif  username == 'g' and password == 'g':
+#            self.controller.show_frame(GuestUserPage)
+#        else:
+#            #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
+#            #python 3:
+#            messagebox.showerror('Error', 'Invalid Login, Please Try Again')
 
     def GuestUserLogin(self):
         self.controller.show_frame(GuestUserPage)
@@ -131,13 +161,26 @@ class CreateGuestUserAccount(Frame):
         username = self.CGUA_entry1.get()
         password = self.CGUA_entry2.get()
 
-        with open('GU.json', 'r+') as f:
-            GU_dict = json.load(f)
-            if username in GU_dict:
-                messagebox.showerror('Error', 'Username already taken. Try again!')
-            else:
-                GU_dict.update({username: password})
-                json.dump(GU_dict,f, sort_keys=True)
+        if username == '' or username[0] == ' ':
+            messagebox.showerror('Error', 'Usernames must begin with a non-whitespace character.')
+        elif password == '':
+            messagebox.showerror('Error', 'Enter a password with at least one character.')
+        else:
+            try:
+                f = open('GU.json', 'r+')
+                GU_dict = json.load(f)
+                if username in GU_dict:
+                    messagebox.showerror('Error', 'Username already taken. Try again!')
+                else:
+                    GU_dict.update({username: password}) # update the dictionary
+                    f.seek(0)
+                    json.dump(GU_dict, f, sort_keys=True) # update json file
+                f.close()
+            except FileNotFoundError:
+                f = open('GU.json', 'w')
+                new_dict = {username: password}
+                json.dump(new_dict, f)
+                f.close()
 
 class GuestUserPage(Frame):
     def __init__(self, parent, controller):
@@ -183,22 +226,45 @@ class Apply_GU_to_OU(Frame):
         agu_label3.pack(side=TOP)
         self.agu_entry3 = Entry(self, bd=5)
         self.agu_entry3.pack(side=TOP)
-        agu_label4 = Label(self, text="Technical Interest Field: ")
+        agu_label4 = Label(self, text="Technical interests:")
         agu_label4.pack(side=TOP)
         agu_options = ["Software Design", "Design Reporting", "Application Development", "Information Systems"]
         self.variable = StringVar(self)
         self.variable.set(agu_options[0])
+        self.variable2 = StringVar(self)
+        self.variable2.set(agu_options[0])
         w = OptionMenu(self, self.variable, *agu_options)
         w.pack(side=TOP)
-        agu_label5 = Label(self, text="Other Technical Interest: ")
+        w2 = OptionMenu(self, self.variable2, *agu_options)
+        w2.pack(side=TOP)
+        agu_label5 = Label(self, text="Other technical interest(s): ")
         agu_label5.pack(side=TOP)
         self.agu_entry5 = Entry(self, bd=5)
         self.agu_entry5.pack(side=TOP)
-        agu_button = Button(self, text='Submit')
+        agu_button = Button(self, text='Submit', command=self.submit_application)
         agu_button.pack(side=TOP)
         cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(GuestUserPage))
         cancel_button.pack(side=BOTTOM)
 
+    def submit_application(self):
+        formatted_application = {Application.current_logged_in_user: {"First name": self.agu_entry1.get(),
+                                                                      "Last name": self.agu_entry2.get(),
+                                                                      "Email": self.agu_entry3.get(),
+                                                                      "Technical interests": [self.variable.get(), self.variable2.get()],
+                                                                      "Other interests": self.agu_entry5.get()}}
+        try:
+            f = open('Applications.json', 'r+')
+            applications = json.load(f)
+            f.seek(0)
+
+            if Application.current_logged_in_user in applications:
+                messagebox.showerror('Error', 'You have already submitted an application, and it is pending.')
+            else:
+                applications.update(formatted_application) # update dictionary with new application
+                json.dump(applications, f) # update json file with updated dictionary
+        except FileNotFoundError:
+            f = open('Applications.json', 'w')
+            json.dump(formatted_application, f)
 
 class Documents_GU(Frame):
     def __init__(self, parent, controller):
@@ -359,8 +425,7 @@ class OrdinaryUserPage(Frame):
             #python 3:
             messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
         else:
-
-            open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            open(sys.path[0] + "/Document/" + new_file_name, "w")
 
     def invite_ou_window(self):
         iou_window = Tk()
@@ -608,7 +673,6 @@ class SuperUserPage(Frame):
         fr = Frame(self)
         rd_Frame = Frame(self)
 
-
         Lab = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
         Lab.pack(padx=15, pady=5)
 
@@ -679,7 +743,7 @@ class SuperUserPage(Frame):
             print(new_file_name)
         else:
             #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            open(sys.path[0] + "/Document/" + new_file_name, "w")
             self.cnd_window.destroy()
 
 class ViewApplications(Frame):
