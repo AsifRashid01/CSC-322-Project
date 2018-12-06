@@ -8,8 +8,6 @@ import sys
 import os
 import json
 # from tkinter import ttk
-LARGE_FONT = ("Verdana", 12)
-
 
 class Application(Tk):
 
@@ -26,9 +24,7 @@ class Application(Tk):
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
                   Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
-                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, CreateGuestUserAccount):
-
-
+                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, CreateGuestUserAccount, ViewComplaints, RemoveOU):
 
             frame = F(container, self)
             self.frames[F] = frame
@@ -49,7 +45,6 @@ class Application(Tk):
             Tk.wm_title(self, "Super User Page")
         else:
             Tk.wm_title(self, "DSS")
-
 
 class LoginPage(Frame):
 
@@ -79,13 +74,17 @@ class LoginPage(Frame):
         # Button to log in as a guest
         btn2 = Button(self, text='Create Guest User Account', command=lambda: self.controller.show_frame(CreateGuestUserAccount))
 
-
         btn.pack(padx=5)
         btn2.pack(padx=6)
 
     def RegisteredUserLogin(self):
         username = self.entry1.get()
         password = self.entry2.get()
+
+        self.entry1.delete(0, 'end')
+        self.entry2.delete(0, 'end')
+
+
         if username == 's' and password == 's':
             self.controller.show_frame(SuperUserPage)
         elif username == 'o' and password == 'o':
@@ -96,9 +95,6 @@ class LoginPage(Frame):
             #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
             #python 3:
             messagebox.showerror('Error', 'Invalid Login, Please Try Again')
-
-    def GuestUserLogin(self):
-        self.controller.show_frame(GuestUserPage)
 
 class CreateGuestUserAccount(Frame):
     def __init__(self, parent, controller):
@@ -207,7 +203,6 @@ class Documents_GU(Frame):
         back_button.pack(side=BOTTOM)
         yd_label = Label(self, text= "Choose a document")
         yd_label.pack(side=TOP)
-        # yd_options = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
         yd_options = os.listdir(sys.path[0] + "/Document")
         self.variable = StringVar(self)
         self.variable.set(yd_options[0])
@@ -232,25 +227,12 @@ class Documents_GU(Frame):
     def doc_decision(self):
 
         # self.button2['state'] = 'disabled'
-        # F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
-        F = open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
+        F = open(sys.path[0] + "/Document/" + self.Var_get, "r")
         a = F.read()
         print (a)
 
         yd_label = Label(self, text= a)
         yd_label.pack(side=TOP)
-
-
-'''
-    def doc_decision(self):
-
-        F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
-        print F.read()
-
-'''
-
-
-
 
 class Taboo_Word_Suggestions_GU(Frame):
     def __init__(self, parent, controller):
@@ -271,14 +253,9 @@ class Taboo_Word_Suggestions_GU(Frame):
         button2 = Button(self, text='submit', command=self.Retrieve_Taboo_words)
         button2.pack(side=TOP)
 
-
-
     def Retrieve_Taboo_words(self):
         result = self.tw_entry1.get("1.0", 'end-3c')
         print(result)
-
-
-
 
 class OrdinaryUserPage(Frame):
     def __init__(self, parent, controller):
@@ -348,13 +325,11 @@ class OrdinaryUserPage(Frame):
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
         file_names = os.listdir(sys.path[0] + "/Document")
-        # file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
         if new_file_name in file_names:
             #python 3:
             messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
         else:
-
-            open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            open(sys.path[0] + "/Document/" + new_file_name, "w")
 
     def invite_ou_window(self):
         iou_window = Tk()
@@ -462,13 +437,13 @@ class SuperUserPage(Frame):
         button1 = Button(fr, text='View OU Applications', command=lambda: controller.show_frame(ViewApplications))
         button1.pack(side=TOP, padx=6, pady=5)
 
-        button2 = Button(fr, text='View Complaints')
+        button2 = Button(fr, text='View Complaints', command=lambda: controller.show_frame(ViewComplaints))
         button2.pack(side=TOP, padx=7, pady=5)
 
         button3 = Button(fr, text='View Taboo Words', command=lambda: controller.show_frame(ViewTabooWords))
         button3.pack(side=TOP, padx=8, pady=5)
 
-        button4 = Button(fr, text='Remove OU\'s')
+        button4 = Button(fr, text='Remove OU\'s', command=lambda: controller.show_frame(RemoveOU))
         button4.pack(side=TOP, padx=9, pady=5)
 
         button5 = Button(fr, text='Search OUs')
@@ -498,29 +473,6 @@ class SuperUserPage(Frame):
         button = Button(self, text="Visit Login User Page", command=lambda: controller.show_frame(LoginPage))
         button.pack()
 
-    def create_new_document_window(self):
-        cnd_window = Tk()
-        cnd_fram = Frame(cnd_window)
-        cnd_label = Label(cnd_fram, text="Enter file name:")
-        cnd_label.pack(side=LEFT)
-        self.cnd_entry = Entry(cnd_fram, bd=5)
-        self.cnd_entry.pack(side=RIGHT)
-        cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
-        cnd_button.pack(side=RIGHT)
-        cnd_fram.pack()
-        cnd_window.mainloop()
-
-    def create_new_document(self):
-        new_file_name = self.cnd_entry.get() + ".txt"
-        #file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
-        file_names = os.listdir(sys.path[0] + "/Document")
-        if new_file_name in file_names:
-            print(new_file_name)
-        else:
-            #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            self.cnd_window.destroy()
-
 class ViewApplications(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
@@ -536,6 +488,24 @@ class ViewApplications(Frame):
         va_ok_button.pack(side=TOP)
         va_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
         va_cancel_button.pack(side=TOP)
+
+class ViewComplaints(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        vc_label = Label(self, text= "Choose a complaint")
+        vc_label.pack(side=TOP)
+        vc_complaints = ["Complaint 1", "Complaint 2", "Complaint 3"]
+        self.vc_var = StringVar(self)
+        self.vc_var.set(vc_complaints[0])
+        vc_om = OptionMenu(self, self.vc_var, *vc_complaints)
+        vc_om.pack(side=TOP)
+        vc_ok_button = Button(self, text='ok')
+        vc_ok_button.pack(side=TOP)
+
+        vc_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        vc_cancel_button.pack(side=TOP)
+
 
 class ViewTabooWords(Frame):
     def __init__(self, parent, controller):
@@ -554,38 +524,22 @@ class ViewTabooWords(Frame):
         vtw_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
         vtw_cancel_button.pack(side=TOP)
 
-class ViewApplications(Frame):
+class RemoveOU(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
-        va_label = Label(self, text= "Choose an application")
-        va_label.pack(side=TOP)
-        va_apps = ["APP 1", "APP 2", "APP 3"]
-        self.va_var = StringVar(self)
-        self.va_var.set(va_apps[0])
-        va_om = OptionMenu(self, self.va_var, *va_apps)
-        va_om.pack(side=TOP)
-        va_ok_button = Button(self, text='ok')
-        va_ok_button.pack(side=TOP)
-        va_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
-        va_cancel_button.pack(side=TOP)
 
+        rou_label = Label(self, text= "Choose an OU")
+        rou_label.pack(side=TOP)
+        rou_OUS = ["OU 1", "OU 2", "OU 3"]
+        self.rou_var = StringVar(self)
+        self.rou_var.set(rou_OUS[0])
+        vc_om = OptionMenu(self, self.rou_var, *rou_OUS)
+        vc_om.pack(side=TOP)
+        vc_ok_button = Button(self, text='remove')
+        vc_ok_button.pack(side=TOP)
 
-class ViewTabooWords(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent, bg='yellow')
-        vtw_label = Label(self, text= "Taboo Words")
-        vtw_label.pack(side=TOP)
-        vtw_list = ["Fork", "Beach", "Damn"]
-        vtw_lb = Listbox(self)
-        vtw_lb.pack(side=TOP)
-        for item in vtw_list:
-            vtw_lb.insert(END, item)
-        vtw_add_button = Button(self, text='Add')
-        vtw_add_button.pack(side=TOP)
-        vtw_remove_button = Button(self, text='Remove')
-        vtw_remove_button.pack(side=TOP)
-        vtw_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
-        vtw_cancel_button.pack(side=TOP)
+        rou_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        rou_cancel_button.pack(side=TOP)
 
 app = Application()
 app.mainloop()
