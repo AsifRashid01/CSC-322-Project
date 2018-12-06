@@ -46,7 +46,7 @@ class Application(Tk):
         else:
             Tk.wm_title(self, "DSS")
 
-    current_logged_in_user = None # variable to keep track of a currently logged in user
+    current_logged_in_user = 'example' # variable to keep track of a currently logged in user
 
 class LoginPage(Frame):
 
@@ -102,25 +102,20 @@ class LoginPage(Frame):
         if username in GU_dict and password == GU_dict[username] or username == 'g' and password == 'g':
             self.controller.show_frame(GuestUserPage)
             Application.current_logged_in_user = username
+            # current_logged_in_user = username
+
         elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
             self.controller.show_frame(OrdinaryUserPage)
-            Application.current_logged_in_user = username
+            # Application.current_logged_in_user = username
+            current_logged_in_user = username
+
         elif username == 's' and password == 's':
             self.controller.show_frame(SuperUserPage)
             Application.current_logged_in_user = username
+            # current_logged_in_user = username
+
         else:
             messagebox.showerror('Error', 'Invalid login information; try again.')
-
-#        if username == 's' and password == 's':
-#            self.controller.show_frame(SuperUserPage)
-#        elif username == 'o' and password == 'o':
-#            self.controller.show_frame(OrdinaryUserPage)
-#        elif  username == 'g' and password == 'g':
-#            self.controller.show_frame(GuestUserPage)
-#        else:
-#            #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
-#            #python 3:
-#            messagebox.showerror('Error', 'Invalid Login, Please Try Again')
 
 class CreateGuestUserAccount(Frame):
     def __init__(self, parent, controller):
@@ -177,8 +172,10 @@ class CreateGuestUserAccount(Frame):
 class GuestUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='green')
+        print(Application.current_logged_in_user)
+        # print(current_logged_in_user)
 
-        Label1 = Label(self, text='Welcome Guest User!', font="Times 25 bold")
+        Label1 = Label(self, text='Welcome Guest User!' + Application.current_logged_in_user, font="Times 25 bold")
         Label1.pack(padx=15, pady=5)
 
         fram = Frame(self)
@@ -237,6 +234,8 @@ class Apply_GU_to_OU(Frame):
         agu_button.pack(side=TOP)
         cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(GuestUserPage))
         cancel_button.pack(side=BOTTOM)
+        print(Application.current_logged_in_user)
+        # print(current_logged_in_user)
 
     def submit_application(self):
         formatted_application = {Application.current_logged_in_user: {"First name": self.agu_entry1.get(),
