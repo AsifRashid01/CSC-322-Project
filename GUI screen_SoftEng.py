@@ -26,7 +26,7 @@ class Application(Tk):
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
                   Your_Documents_OU, Recent_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
-                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, File_Complaints, CreateGuestUserAccount):
+                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, File_Complaints, CreateGuestUserAccount, Taboo_Word_Suggestions_OU):
 
 
 
@@ -315,7 +315,7 @@ class OrdinaryUserPage(Frame):
         but5 = Button(fra, text='File Complaints', command=lambda: controller.show_frame(File_Complaints))
         but5.pack(side=TOP, padx=10, pady=5)
 
-        but6 = Button(fra, text='Suggest Taboo words') # command=lambda: controller.show_frame(Taboo_Word_Suggestions_GU))  use GU's one or make another one?
+        but6 = Button(fra, text='Suggest Taboo words', command=lambda: controller.show_frame(Taboo_Word_Suggestions_OU))
         but6.pack(side=TOP, padx=9, pady=5)
 
         Labe1 = Label(fra, text='Recent Documents: ', font="Times 25 bold")
@@ -540,6 +540,31 @@ class File_Complaints(Frame):
         var1.pack(side=TOP)
         button0 = Button(self, text = "Submit")
         button0.pack(side=TOP, pady = 5)
+
+
+class Taboo_Word_Suggestions_OU(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(OrdinaryUserPage))
+        cancel_button.pack(side=BOTTOM)
+        tw_label = Label(self, text="** You are about to send a list of taboo words ** ")
+        tw_label.pack(side=TOP)
+
+        tw_label1 = Label(self, text="Enter taboo words (one word per line): ")
+        tw_label1.pack(side=TOP)
+
+        self.tw_entry1 = Text(self, bd=5)
+
+        self.tw_entry1.pack(side=TOP)
+
+        button2 = Button(self, text='submit', command=self.Retrieve_Taboo_words)
+        button2.pack(side=TOP)
+
+
+    def Retrieve_Taboo_words(self):
+        result = self.tw_entry1.get("1.0", 'end-3c')
+        print(result)
 
 
 class Your_Documents_SU(Frame):
