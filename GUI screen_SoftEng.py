@@ -353,8 +353,7 @@ class OrdinaryUserPage(Frame):
             #python 3:
             messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
         else:
-
-            open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            open(sys.path[0] + "/Document/" + new_file_name, "w")
 
     def invite_ou_window(self):
         iou_window = Tk()
@@ -518,7 +517,7 @@ class SuperUserPage(Frame):
             print(new_file_name)
         else:
             #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            open("C:/Users/saddi/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+            open(sys.path[0] + "/Document/" + new_file_name, "w")
             self.cnd_window.destroy()
 
 class ViewApplications(Frame):
