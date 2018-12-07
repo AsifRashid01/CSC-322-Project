@@ -50,7 +50,7 @@ class Application(Tk):
         else:
             Tk.wm_title(self, "DSS")
 
-    current_user = '' # variable to keep track of a currently logged in user
+    current_logged_in_user = None # variable to keep track of a currently logged in user
 
 class LoginPage(Frame):
 
@@ -87,7 +87,7 @@ class LoginPage(Frame):
     def RegisteredUserLogin(self):
         username = self.entry1.get()
         password = self.entry2.get()
-
+        
         try:
             GU_file = open('GU.json', 'r')
             GU_dict = json.load(GU_file)
@@ -106,23 +106,29 @@ class LoginPage(Frame):
 
         if username in GU_dict and password == GU_dict[username] or username == 'g' and password == 'g':
             self.controller.show_frame(GuestUserPage)
-            Application.current_user = username
+            Application.current_logged_in_user = username
         elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
             self.controller.show_frame(OrdinaryUserPage)
-            Application.current_user = username
+            Application.current_logged_in_user = username
         elif username == 's' and password == 's':
             self.controller.show_frame(SuperUserPage)
-            Application.current_user = username
+            Application.current_logged_in_user = username
         else:
             messagebox.showerror('Error', 'Invalid login information; try again.')
 
-        # When we log in, we want to change the welcome_label (which is an instance variable of GuestUserPage) of the GuestUserPage object
-        # The GuestUserPage object belongs to the app object: it's stored in app.frames. To change a label, we use label.config().
-        app.frames[GuestUserPage].welcome_label.config(text='Welcome Guest User ' + Application.current_user)
-        
+#        if username == 's' and password == 's':
+#            self.controller.show_frame(SuperUserPage)
+#        elif username == 'o' and password == 'o':
+#            self.controller.show_frame(OrdinaryUserPage)
+#        elif  username == 'g' and password == 'g':
+#            self.controller.show_frame(GuestUserPage)
+#        else:
+#            #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
+#            #python 3:
+#            messagebox.showerror('Error', 'Invalid Login, Please Try Again')
 
     def GuestUserLogin(self):
-        self.controller.show_frame(parent)
+        self.controller.show_frame(GuestUserPage)
 
 class CreateGuestUserAccount(Frame):
     def __init__(self, parent, controller):
@@ -179,9 +185,9 @@ class CreateGuestUserAccount(Frame):
 class GuestUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='green')
-        
-        self.welcome_label = Label(self, text='Welcome Guest User', font="Times 25 bold")
-        self.welcome_label.pack(padx=15, pady=5)
+
+        Label1 = Label(self, text='Welcome Guest User!', font="Times 25 bold")
+        Label1.pack(padx=15, pady=5)
 
         fram = Frame(self)
 
@@ -203,6 +209,7 @@ class GuestUserPage(Frame):
 
         button = Button(self, text="Visit Login Page", command=lambda: controller.show_frame(LoginPage))
         button.pack()
+
 
 class Apply_GU_to_OU(Frame):
     def __init__(self, parent, controller):
@@ -240,17 +247,17 @@ class Apply_GU_to_OU(Frame):
         cancel_button.pack(side=BOTTOM)
 
     def submit_application(self):
-        formatted_application = {Application.current_user: {"First name": self.agu_entry1.get(),
-                                                            "Last name": self.agu_entry2.get(),
-                                                            "Email": self.agu_entry3.get(),
-                                                            "Technical interests": [self.variable.get(), self.variable2.get()],
-                                                            "Other interests": self.agu_entry5.get()}}
+        formatted_application = {Application.current_logged_in_user: {"First name": self.agu_entry1.get(),
+                                                                      "Last name": self.agu_entry2.get(),
+                                                                      "Email": self.agu_entry3.get(),
+                                                                      "Technical interests": [self.variable.get(), self.variable2.get()],
+                                                                      "Other interests": self.agu_entry5.get()}}
         try:
             f = open('Applications.json', 'r+')
             applications = json.load(f)
             f.seek(0)
 
-            if Application.current_user in applications:
+            if Application.current_logged_in_user in applications:
                 messagebox.showerror('Error', 'You have already submitted an application, and it is pending.')
             else:
                 applications.update(formatted_application) # update dictionary with new application
