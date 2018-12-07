@@ -25,7 +25,9 @@ class Application(Tk):
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
                   Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions,
                   ViewApplications, ViewTabooWords, ViewSuggestedTaboos, Apply_GU_to_OU, CreateGuestUserAccount, ViewComplaints,
-                  RemoveOU, Recent_Documents_OU, File_Complaints):
+                  RemoveOU, Recent_Documents_OU, File_Complaints,
+                  create_new_document, invite_ou_window, accept_decline_invites, get_info_ou, display_ou_info):
+
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -114,9 +116,6 @@ class LoginPage(Frame):
         else:
             messagebox.showerror('Error', 'Invalid login information; try again.')
 
-    def GuestUserLogin(self):
-        self.controller.show_frame(GuestUserPage)
-
 class CreateGuestUserAccount(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='red')
@@ -175,7 +174,6 @@ class GuestUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='green')
         print(Application.current_logged_in_user)
-        # print(current_logged_in_user)
 
         self.welcome_label = Label(self, text='Welcome Guest User', font="Times 25 bold")
         self.welcome_label.pack(padx=15, pady=5)
@@ -237,7 +235,6 @@ class Apply_GU_to_OU(Frame):
         cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(GuestUserPage))
         cancel_button.pack(side=BOTTOM)
         print(Application.current_logged_in_user)
-        # print(current_logged_in_user)
 
     def submit_application(self):
         formatted_application = {Application.current_logged_in_user: {"First name": self.agu_entry1.get(),
@@ -297,18 +294,6 @@ class Documents_GU(Frame):
         yd_label = Label(self, text= a)
         yd_label.pack(side=TOP)
 
-
-'''
-    def doc_decision(self):
-
-        F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
-        print F.read()
-
-'''
-
-
-
-
 class Taboo_Word_Suggestions(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
@@ -366,16 +351,16 @@ class OrdinaryUserPage(Frame):
         but_0 = Button(fra, text='Your Documents', command=lambda: controller.show_frame(Your_Documents_OU))
         but_0.pack(side=TOP, padx=4, pady=5)
 
-        but0 = Button(fra, text='Create new document', command=self.create_new_document_window)
+        but0 = Button(fra, text='Create new document', command=lambda: controller.show_frame(create_new_document))
         but0.pack(side=TOP, padx=5, pady=5)
 
-        but1 = Button(fra, text='Invite OUs', command=self.invite_ou_window)
+        but1 = Button(fra, text='Invite OUs', command=lambda: controller.show_frame(invite_ou_window))
         but1.pack(side=TOP, padx=6, pady=5)
 
-        but2 = Button(fra, text='View Invitations', command=self.accept_decline_invites)
+        but2 = Button(fra, text='View Invitations', command=lambda: controller.show_frame(accept_decline_invites))
         but2.pack(side=TOP, padx=7, pady=5)
 
-        but3 = Button(fra, text='Search other Users', command=self.get_info_ou)
+        but3 = Button(fra, text='Search other Users', command=lambda: controller.show_frame(get_info_ou))
         but3.pack(side=TOP, padx=8, pady=5)
 
         but4 = Button(fra, text='Process Complaints of OUs')
@@ -407,112 +392,6 @@ class OrdinaryUserPage(Frame):
 
         button = Button(self, text="Visit Login User Page", command=lambda: controller.show_frame(LoginPage))
         button.pack()
-
-    def create_new_document_window(self):
-        self.cnd_window = Tk()
-        cnd_fram = Frame(self.cnd_window)
-        cnd_label = Label(cnd_fram, text= "Enter file name:")
-        cnd_label.pack(side = LEFT)
-        self.cnd_entry = Entry(cnd_fram, bd = 5)
-        self.cnd_entry.pack(side = LEFT)
-        cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
-        cnd_button.pack(side = LEFT)
-        cnd_fram.pack()
-        self.cnd_window.mainloop()
-
-    def create_new_document(self):
-        new_file_name = self.cnd_entry.get() + ".txt"
-        file_names = os.listdir(sys.path[0] + "/Document")
-        if new_file_name in file_names:
-            #python 3:
-            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
-        else:
-            open(sys.path[0] + "/Document/" + new_file_name, "w")
-
-    def invite_ou_window(self):
-        iou_window = Tk()
-        iou_frame = Frame(iou_window)
-        iou_label = Label(iou_frame, text="Who would you like to invite: ")
-        iou_label.pack(side=TOP)
-        iou_frame.pack()
-        options = ["User1", "User2", "User3"]
-        iou_button = Button(iou_frame, text='Invite')
-        iou_button.pack(side=RIGHT)
-        variable = StringVar(iou_window)
-        variable.set(options[0])
-        w = OptionMenu(iou_window, variable, *options)
-        w.pack(side=TOP)
-        iou_window.mainloop()
-
-    def accept_decline_invites(self):
-        adi_window = Tk()
-        adi_frame = Frame(adi_window)
-        adi_label = Label(adi_frame, text = "Invitations:")
-        adi_label.pack(side=TOP)
-        adi_frame.pack()
-        options = ["doc1.txt", "doc2.txt", "doc3.txt"]
-        variable = StringVar(adi_window)
-        variable.set(options[0])
-        w = OptionMenu(adi_frame, variable, *options)
-        w.pack(side=TOP)
-        adi_button0 = Button(adi_frame, text = 'Cancel', command=adi_window.destroy)
-        adi_button0.pack(side=LEFT, padx = 6, pady = 4)
-        adi_button1 = Button(adi_frame, text = 'Accept')
-        adi_button1.pack(side=LEFT, padx = 6, pady =4)
-        adi_button2 = Button(adi_frame, text = 'Decline')
-        adi_button2.pack(side=LEFT, padx = 6, pady = 4)
-        adi_window.mainloop()
-
-
-    def get_info_ou(self):
-        gio_window = Tk()
-        gio_window.title("Search for an OU")
-        gio_frame = Frame(gio_window)
-        gio_label0 = Label(gio_frame, text = "Enter OU's Name:")
-        gio_label0.pack(side=TOP)
-        self.gio_entry0 = Entry(gio_frame, bd = 5)
-        self.gio_entry0.pack(side=TOP)
-        gio_label1 = Label(gio_frame, text = "Interests: ")
-        gio_label1.pack(side=TOP)
-        self.gio_entry1 = Entry(gio_frame, bd =5)
-        self.gio_entry1.pack(side=TOP)
-        gio_button0 = Button(gio_frame, text = "cancel", command=gio_window.destroy)
-        gio_button0.pack(side=LEFT, padx = 6, pady = 4)
-        gio_button1 = Button(gio_frame, text = "search", command=self.display_ou_info)
-        gio_button1.pack(side=LEFT, padx = 6, pady = 4)
-        gio_frame.pack()
-        gio_window.mainloop()
-
-
-    def display_ou_info(self):
-
-        # if self.gio_entry0.get() == "" and self.gio_entry1.get() == "":
-        #     print("Invalid entry")
-
-        dou_window = Tk()
-        dou_window.title("View OU profiles")
-        dou_frame = Frame(dou_window)
-        dou_frame.pack()
-        dou_label0 = Label(dou_frame, text = "Best matches:")
-        dou_label0.pack(side=TOP)
-
-        if self.gio_entry0.get() == "John Doe" and self.gio_entry1.get() == "Interest1":
-            lb = Listbox(dou_frame, height=1, bd = 3)
-            lb.pack(side=TOP)
-            lb.insert(END, "John Doe")
-        else:
-            users = ["User1", "User2", "User3"]
-            variable = StringVar(dou_frame)
-            variable.set(users[0])
-            w = OptionMenu(dou_frame, variable, *users)
-            w.pack(side=TOP)
-
-        dou_button0 = Button(dou_frame, text = "Cancel", command=dou_window.destroy)
-        dou_button0.pack(side=LEFT, padx = 6, pady = 4)
-        dou_button1 = Button(dou_frame, text = "View profile")
-        dou_button1.pack(side=LEFT, padx = 6, pady = 4)
-        dou_window.mainloop()
-
 
 class Your_Documents_OU(Frame):
     def __init__(self, parent, controller):
@@ -582,15 +461,7 @@ class File_Complaints(Frame):
             Frame.__init__(self, parent, bg='yellow')
             label0 = Label(self, text = "Select Document:")
             label0.pack(side=TOP)
-
-            # import os
-            # path = 'C:/Users/Asif/Desktop/Project test/Document/'
-            # fc_options = []
-            # for filename in os.listdir(path):
-            #     fc_options.append(filename)
-
             fc_options = os.listdir(sys.path[0] + "/Document/")
-
             self.variable = StringVar(self)
             self.variable.set(fc_options[0])
             w = OptionMenu(self, self.variable, *fc_options)
@@ -642,6 +513,92 @@ class Your_Documents_SU(Frame):
         button3 = Button(self, text='go back')
         button3.pack(side=TOP)
 
+class create_new_document(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        cnd_label = Label(self, text= "Enter file name:")
+        cnd_label.pack(side = LEFT)
+        self.cnd_entry = Entry(self, bd = 5)
+        self.cnd_entry.pack(side = LEFT)
+        cnd_button = Button(self, text='Submit')
+        cnd_button.pack(side = LEFT)
+
+    def create_new_document(self):
+        new_file_name = self.cnd_entry.get() + ".txt"
+        file_names = os.listdir(sys.path[0] + "/Document")
+        if new_file_name in file_names:
+            #python 3:
+            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
+        else:
+            open(sys.path[0] + "/Document/" + new_file_name, "w")
+
+class invite_ou_window(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        iou_label = Label(self, text="Who would you like to invite: ")
+        iou_label.pack(side=TOP)
+        options = ["User1", "User2", "User3"]
+        iou_button = Button(self, text='Invite')
+        iou_button.pack(side=RIGHT)
+        variable = StringVar(self)
+        variable.set(options[0])
+        w = OptionMenu(self, variable, *options)
+        w.pack(side=TOP)
+
+class accept_decline_invites(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        adi_label = Label(self, text = "Invitations:")
+        adi_label.pack(side=TOP)
+        options = ["doc1.txt", "doc2.txt", "doc3.txt"]
+        variable = StringVar(self)
+        variable.set(options[0])
+        w = OptionMenu(self, variable, *options)
+        w.pack(side=TOP)
+        adi_button0 = Button(self, text = 'Cancel')
+        adi_button0.pack(side=LEFT, padx = 6, pady = 4)
+        adi_button1 = Button(self, text = 'Accept')
+        adi_button1.pack(side=LEFT, padx = 6, pady =4)
+        adi_button2 = Button(self, text = 'Decline')
+        adi_button2.pack(side=LEFT, padx = 6, pady = 4)
+
+class get_info_ou(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        gio_label0 = Label(self, text = "Enter OU's Name:")
+        gio_label0.pack(side=TOP)
+        self.gio_entry0 = Entry(self, bd = 5)
+        self.gio_entry0.pack(side=TOP)
+        gio_label1 = Label(self, text = "Interests: ")
+        gio_label1.pack(side=TOP)
+        self.gio_entry1 = Entry(self, bd =5)
+        self.gio_entry1.pack(side=TOP)
+        gio_button0 = Button(self, text = "cancel")
+        gio_button0.pack(side=LEFT, padx = 6, pady = 4)
+        gio_button1 = Button(self, text = "search", command=lambda: controller.show_frame(display_ou_info))
+        gio_button1.pack(side=LEFT, padx = 6, pady = 4)
+
+class display_ou_info(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        dou_label0 = Label(self, text = "Best matches:")
+        dou_label0.pack(side=TOP)
+
+        # if self.gio_entry0.get() == "John Doe" and self.gio_entry1.get() == "Interest1":
+        #     lb = Listbox(dou_frame, height=1, bd = 3)
+        #     lb.pack(side=TOP)
+        #     lb.insert(END, "John Doe")
+        # else:
+        #     users = ["User1", "User2", "User3"]
+        #     variable = StringVar(self)
+        #     variable.set(users[0])
+        #     w = OptionMenu(self, variable, *users)
+        #     w.pack(side=TOP)
+
+        dou_button0 = Button(self, text = "Cancel")
+        dou_button0.pack(side=LEFT, padx = 6, pady = 4)
+        dou_button1 = Button(self, text = "View profile")
+        dou_button1.pack(side=LEFT, padx = 6, pady = 4)
 
 class SuperUserPage(Frame):
     def __init__(self, parent, controller):
