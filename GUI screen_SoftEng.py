@@ -84,7 +84,7 @@ class LoginPage(Frame):
     def RegisteredUserLogin(self):
         username = self.entry1.get()
         password = self.entry2.get()
-        
+
         try:
             GU_file = open('GU.json', 'r')
             GU_dict = json.load(GU_file)
@@ -108,8 +108,8 @@ class LoginPage(Frame):
 
         elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
             self.controller.show_frame(OrdinaryUserPage)
-            # Application.current_logged_in_user = username
-            current_logged_in_user = username
+            Application.current_logged_in_user = username
+            # current_logged_in_user = username
 
         elif username == 's' and password == 's':
             self.controller.show_frame(SuperUserPage)
