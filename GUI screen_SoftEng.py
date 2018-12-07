@@ -9,7 +9,7 @@ import os
 import json
 # from tkinter import ttk
 LARGE_FONT = ("Verdana", 12)
-#
+
 
 class Application(Tk):
 
@@ -50,7 +50,7 @@ class Application(Tk):
         else:
             Tk.wm_title(self, "DSS")
 
-    current_logged_in_user = None # variable to keep track of a currently logged in user
+    current_logged_in_user = '' # variable to keep track of a currently logged in user
 
 class LoginPage(Frame):
 
@@ -116,16 +116,7 @@ class LoginPage(Frame):
         else:
             messagebox.showerror('Error', 'Invalid login information; try again.')
 
-#        if username == 's' and password == 's':
-#            self.controller.show_frame(SuperUserPage)
-#        elif username == 'o' and password == 'o':
-#            self.controller.show_frame(OrdinaryUserPage)
-#        elif  username == 'g' and password == 'g':
-#            self.controller.show_frame(GuestUserPage)
-#        else:
-#            #tkMessageBox.showinfo('Status', 'Invalid Login, Please Try Again')
-#            #python 3:
-#            messagebox.showerror('Error', 'Invalid Login, Please Try Again')
+        app.frames[GuestUserPage].welcome_label.config(text='Welcome Guest User ' + Application.current_logged_in_user)
 
     def GuestUserLogin(self):
         self.controller.show_frame(GuestUserPage)
@@ -186,8 +177,8 @@ class GuestUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='green')
 
-        Label1 = Label(self, text='Welcome Guest User!', font="Times 25 bold")
-        Label1.pack(padx=15, pady=5)
+        self.welcome_label = Label(self, text='Welcome Guest User', font="Times 25 bold")
+        self.welcome_label.pack(padx=15, pady=5)
 
         fram = Frame(self)
 
