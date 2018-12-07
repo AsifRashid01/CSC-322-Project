@@ -25,8 +25,8 @@ class Application(Tk):
         self.frames = {}
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
-                  Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
-                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, CreateGuestUserAccount):
+                  Your_Documents_OU, Recent_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
+                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, File_Complaints, CreateGuestUserAccount, Taboo_Word_Suggestions_OU):
 
 
 
@@ -362,25 +362,31 @@ class OrdinaryUserPage(Frame):
         but1 = Button(fra, text='Invite OUs', command=self.invite_ou_window)
         but1.pack(side=TOP, padx=6, pady=5)
 
-        but2 = Button(fra, text='Accept or Deny invitations')
+        but2 = Button(fra, text='View Invitations', command=self.accept_decline_invites)
         but2.pack(side=TOP, padx=7, pady=5)
 
-        but3 = Button(fra, text='Get info about other OUs')
+        but3 = Button(fra, text='Search other Users', command=self.get_info_ou)
         but3.pack(side=TOP, padx=8, pady=5)
 
         but4 = Button(fra, text='Process Complaints of OUs')
         but4.pack(side=TOP, padx=9, pady=5)
 
+        but5 = Button(fra, text='File Complaints', command=lambda: controller.show_frame(File_Complaints))
+        but5.pack(side=TOP, padx=10, pady=5)
+
+        but6 = Button(fra, text='Suggest Taboo words', command=lambda: controller.show_frame(Taboo_Word_Suggestions_OU))
+        but6.pack(side=TOP, padx=9, pady=5)
+
         Labe1 = Label(fra, text='Recent Documents: ', font="Times 25 bold")
         Labe1.pack(side=TOP, padx=11, pady=5)
 
-        button8 = Button(fra, text='Document 1')
+        button8 = Button(fra, text='Document 1', command=lambda: controller.show_frame(Recent_Documents_OU))
         button8.pack(side=LEFT, padx=14, pady=5)
 
-        button9 = Button(fra, text='Document 2')
+        button9 = Button(fra, text='Document 2', command=lambda: controller.show_frame(Recent_Documents_OU))
         button9.pack(side=LEFT, padx=13, pady=5)
 
-        button9 = Button(fra, text='Document 3')
+        button9 = Button(fra, text='Document 3', command=lambda: controller.show_frame(Recent_Documents_OU))
         button9.pack(side=LEFT, padx=12, pady=5)
 
         button10 = Button(self, text='Add Profile Picture')
@@ -429,6 +435,75 @@ class OrdinaryUserPage(Frame):
         w.pack(side=TOP)
         iou_window.mainloop()
 
+    def accept_decline_invites(self):
+        adi_window = Tk()
+        adi_frame = Frame(adi_window)
+        adi_label = Label(adi_frame, text = "Invitations:")
+        adi_label.pack(side=TOP)
+        adi_frame.pack()
+        options = ["doc1.txt", "doc2.txt", "doc3.txt"]
+        variable = StringVar(adi_window)
+        variable.set(options[0])
+        w = OptionMenu(adi_frame, variable, *options)
+        w.pack(side=TOP)
+        adi_button0 = Button(adi_frame, text = 'Cancel', command=adi_window.destroy)
+        adi_button0.pack(side=LEFT, padx = 6, pady = 4)
+        adi_button1 = Button(adi_frame, text = 'Accept')
+        adi_button1.pack(side=LEFT, padx = 6, pady =4)
+        adi_button2 = Button(adi_frame, text = 'Decline')
+        adi_button2.pack(side=LEFT, padx = 6, pady = 4)
+        adi_window.mainloop()
+
+
+    def get_info_ou(self):
+        gio_window = Tk()
+        gio_window.title("Search for an OU")
+        gio_frame = Frame(gio_window)
+        gio_label0 = Label(gio_frame, text = "Enter OU's Name:")
+        gio_label0.pack(side=TOP)
+        self.gio_entry0 = Entry(gio_frame, bd = 5)
+        self.gio_entry0.pack(side=TOP)
+        gio_label1 = Label(gio_frame, text = "Interests: ")
+        gio_label1.pack(side=TOP)
+        self.gio_entry1 = Entry(gio_frame, bd =5)
+        self.gio_entry1.pack(side=TOP)
+        gio_button0 = Button(gio_frame, text = "cancel", command=gio_window.destroy)
+        gio_button0.pack(side=LEFT, padx = 6, pady = 4)
+        gio_button1 = Button(gio_frame, text = "search", command=self.display_ou_info)
+        gio_button1.pack(side=LEFT, padx = 6, pady = 4)
+        gio_frame.pack()
+        gio_window.mainloop()
+
+
+    def display_ou_info(self):
+
+        # if self.gio_entry0.get() == "" and self.gio_entry1.get() == "":
+        #     print("Invalid entry")
+
+        dou_window = Tk()
+        dou_window.title("View OU profiles")
+        dou_frame = Frame(dou_window)
+        dou_frame.pack()
+        dou_label0 = Label(dou_frame, text = "Best matches:")
+        dou_label0.pack(side=TOP)
+
+        if self.gio_entry0.get() == "John Doe" and self.gio_entry1.get() == "Interest1":
+            lb = Listbox(dou_frame, height=1, bd = 3)
+            lb.pack(side=TOP)
+            lb.insert(END, "John Doe")
+        else:
+            users = ["User1", "User2", "User3"]
+            variable = StringVar(dou_frame)
+            variable.set(users[0])
+            w = OptionMenu(dou_frame, variable, *users)
+            w.pack(side=TOP)
+
+        dou_button0 = Button(dou_frame, text = "Cancel", command=dou_window.destroy)
+        dou_button0.pack(side=LEFT, padx = 6, pady = 4)
+        dou_button1 = Button(dou_frame, text = "View profile")
+        dou_button1.pack(side=LEFT, padx = 6, pady = 4)
+        dou_window.mainloop()
+
 
 class Your_Documents_OU(Frame):
     def __init__(self, parent, controller):
@@ -438,16 +513,19 @@ class Your_Documents_OU(Frame):
         back_button.pack(side=BOTTOM)
         yd_label = Label(self, text= "Choose Document")
         yd_label.pack(side=TOP)
-        yd_options = ["Doc 1", "Doc 2", "Doc 3"]
+        #yd_options = ["Doc 1", "Doc 2", "Doc 3"]
+        yd_options = os.listdir(sys.path[0] + "/Document/")
         self.variable = StringVar(self)
         self.variable.set(yd_options[0])
         w = OptionMenu(self, self.variable, *yd_options)
         w.pack(side=TOP)
-        button1 = Button(self, text='ok', command= self.doc_selection)
-        button1.pack(side=TOP)
+        self.button1 = Button(self, text='ok', command= self.doc_selection)
+        self.button1.pack(side=TOP)
 
     def doc_selection(self):
-        print(self.variable.get())
+        #print(self.variable.get())
+        self.button1['state'] = 'disabled'
+        self.Var_get = self.variable.get()
         yd_label2 = Label(self, text="What would you like to do?")
         yd_label2.pack(side=TOP)
         yd_options2 = ["Read Doc", "Edit Doc", "Send suggestions (taboo words)", "retrieve older versions",
@@ -457,11 +535,94 @@ class Your_Documents_OU(Frame):
         w = OptionMenu(self, variable2, *yd_options2)
         w.pack(side=TOP)
 
-        button2 = Button(self, text='submit')
+        button2 = Button(self, text='submit', command = self.doc_decision_ou)
         button2.pack(side=TOP)
 
         button3 = Button(self, text='go back')
         button3.pack(side=TOP)
+
+    def doc_decision_ou(self):
+        F = open(sys.path[0] + "/Document/" + self.Var_get, "r")
+        a = F.read()
+        print (a)
+        yd_label = Label(self, text= a)
+        yd_label.pack(side=TOP)
+
+
+
+class Recent_Documents_OU(Frame):
+     def __init__(self, parent, controller):
+         Frame.__init__(self, parent, bg='yellow')
+         rd_label0 = Label(self, text="What would you like to do?")
+         rd_label0.pack(side=TOP)
+         rd_options = ["Read", "Edit", "Retrieve older versions", "Change privacy setting", "Lock document", "Unlock document", "Remove collaborator"]
+         variable = StringVar(self)
+         variable.set(rd_options[0])
+         w = OptionMenu(self, variable, *rd_options)
+         w.pack(side=TOP)
+
+         button0 = Button(self, text='submit')
+         button0.pack(side=TOP)
+         button1 = Button(self, text='back', command=lambda: controller.show_frame(OrdinaryUserPage))
+         button1.pack(side=TOP)
+
+
+
+class File_Complaints(Frame):
+    def __init__(self, parent, controller):
+            Frame.__init__(self, parent, bg='yellow')
+            label0 = Label(self, text = "Select Document:")
+            label0.pack(side=TOP)
+
+            # import os
+            # path = 'C:/Users/Asif/Desktop/Project test/Document/'
+            # fc_options = []
+            # for filename in os.listdir(path):
+            #     fc_options.append(filename)
+
+            fc_options = os.listdir(sys.path[0] + "/Document/")
+
+            self.variable = StringVar(self)
+            self.variable.set(fc_options[0])
+            w = OptionMenu(self, self.variable, *fc_options)
+            w.pack(side=TOP)
+            button1 = Button(self, text = "ok", command=self.Complain_About)
+            button1.pack(side=TOP)
+
+    def Complain_About(self):
+        T = Text(self, height = 3, width = 30)
+        T.pack(side = TOP, pady = 10)
+        T.insert(END, "Write complaint here")
+
+        var1 = Checkbutton(self, text = "Notify owner")
+        var1.pack(side=TOP)
+        button0 = Button(self, text = "Submit")
+        button0.pack(side=TOP, pady = 5)
+
+
+class Taboo_Word_Suggestions_OU(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(OrdinaryUserPage))
+        cancel_button.pack(side=BOTTOM)
+        tw_label = Label(self, text="** You are about to send a list of taboo words ** ")
+        tw_label.pack(side=TOP)
+
+        tw_label1 = Label(self, text="Enter taboo words (one word per line): ")
+        tw_label1.pack(side=TOP)
+
+        self.tw_entry1 = Text(self, bd=5)
+
+        self.tw_entry1.pack(side=TOP)
+
+        button2 = Button(self, text='submit', command=self.Retrieve_Taboo_words)
+        button2.pack(side=TOP)
+
+
+    def Retrieve_Taboo_words(self):
+        result = self.tw_entry1.get("1.0", 'end-3c')
+        print(result)
 
 
 class Your_Documents_SU(Frame):
