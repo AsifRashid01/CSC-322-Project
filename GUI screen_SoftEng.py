@@ -23,11 +23,9 @@ class Application(Tk):
         self.frames = {}
 
         for F in (LoginPage, GuestUserPage, OrdinaryUserPage, SuperUserPage,
-                  Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions_GU,
-                  ViewApplications, ViewTabooWords, Apply_GU_to_OU, CreateGuestUserAccount, ViewComplaints,
-                  RemoveOU, Recent_Documents_OU, File_Complaints, Taboo_Word_Suggestions_OU):
-
-
+                  Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions,
+                  ViewApplications, ViewTabooWords, ViewSuggestedTaboos, Apply_GU_to_OU, CreateGuestUserAccount, ViewComplaints,
+                  RemoveOU, Recent_Documents_OU, File_Complaints):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -48,7 +46,7 @@ class Application(Tk):
         else:
             Tk.wm_title(self, "DSS")
 
-    current_logged_in_user = 'example' # variable to keep track of a currently logged in user
+    current_logged_in_user = '' # variable to keep track of a currently logged in user
 
 class LoginPage(Frame):
 
@@ -104,20 +102,20 @@ class LoginPage(Frame):
         if username in GU_dict and password == GU_dict[username] or username == 'g' and password == 'g':
             self.controller.show_frame(GuestUserPage)
             Application.current_logged_in_user = username
-            # current_logged_in_user = username
-
+            app.frames[GuestUserPage].welcome_label.config(text='Welcome Guest User ' + Application.current_logged_in_user)
         elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
             self.controller.show_frame(OrdinaryUserPage)
             Application.current_logged_in_user = username
-            # current_logged_in_user = username
-
+            app.frames[OrdinaryUserPage].welcome_label.config(text='Welcome Ordinary User ' + Application.current_logged_in_user)
         elif username == 's' and password == 's':
             self.controller.show_frame(SuperUserPage)
             Application.current_logged_in_user = username
-            # current_logged_in_user = username
-
+            app.frames[SuperUserPage].welcome_label.config(text='Welcome Super User ' + Application.current_logged_in_user)
         else:
             messagebox.showerror('Error', 'Invalid login information; try again.')
+
+    def GuestUserLogin(self):
+        self.controller.show_frame(GuestUserPage)
 
 class CreateGuestUserAccount(Frame):
     def __init__(self, parent, controller):
@@ -171,14 +169,16 @@ class CreateGuestUserAccount(Frame):
                 json.dump(new_dict, f)
                 f.close()
 
+        self.controller.show_frame(LoginPage)
+
 class GuestUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='green')
         print(Application.current_logged_in_user)
         # print(current_logged_in_user)
 
-        Label1 = Label(self, text='Welcome Guest User!' + Application.current_logged_in_user, font="Times 25 bold")
-        Label1.pack(padx=15, pady=5)
+        self.welcome_label = Label(self, text='Welcome Guest User', font="Times 25 bold")
+        self.welcome_label.pack(padx=15, pady=5)
 
         fram = Frame(self)
 
@@ -190,7 +190,7 @@ class GuestUserPage(Frame):
         but0 = Button(fram, text='Documents', command=lambda: controller.show_frame(Documents_GU))
         but0.pack(side=TOP, padx=5, pady=5)
 
-        but1 = Button(fram, text='Send Taboo word suggestions to SU', command=lambda: controller.show_frame(Taboo_Word_Suggestions_GU))
+        but1 = Button(fram, text='Send Taboo word suggestions to SU', command=lambda: controller.show_frame(Taboo_Word_Suggestions))
         but1.pack(side=TOP, padx=7, pady=5)
 
         but2 = Button(fram, text='Apply to be an OU', command=lambda: controller.show_frame(Apply_GU_to_OU))
@@ -297,35 +297,64 @@ class Documents_GU(Frame):
         yd_label = Label(self, text= a)
         yd_label.pack(side=TOP)
 
-class Taboo_Word_Suggestions_GU(Frame):
+
+'''
+    def doc_decision(self):
+
+        F = open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + self.Var_get, "r")
+        print F.read()
+
+'''
+
+
+
+
+class Taboo_Word_Suggestions(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
 
-        cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(GuestUserPage))
+        cancel_button = Button(self, text="Go back", command=lambda: controller.show_frame(GuestUserPage))
         cancel_button.pack(side=BOTTOM)
         tw_label = Label(self, text="** You are about to send a list of taboo words ** ")
         tw_label.pack(side=TOP)
 
-        tw_label1 = Label(self, text="Enter taboo words (one word per line): ")
+        tw_label1 = Label(self, text="Enter taboo words separated by spaces or lines: ")
         tw_label1.pack(side=TOP)
 
         self.tw_entry1 = Text(self, bd=5)
 
         self.tw_entry1.pack(side=TOP)
 
-        button2 = Button(self, text='submit', command=self.Retrieve_Taboo_words)
+        button2 = Button(self, text='submit', command=self.submit_taboo_suggestions)
         button2.pack(side=TOP)
 
-    def Retrieve_Taboo_words(self):
-        result = self.tw_entry1.get("1.0", 'end-3c')
-        print(result)
+    def submit_taboo_suggestions(self):
+        try:
+            f = open('Taboo suggestions.json', 'r+')
+            list_of_suggested_taboos = json.load(f)
+
+        except FileNotFoundError:
+            f = open('Taboo suggestions.json', 'w+')
+            json.dump({}, f)
+            list_of_suggested_taboos = {}
+
+        submission_list = self.tw_entry1.get('1.0', END).split()
+
+        for w in submission_list:
+            if w not in list_of_suggested_taboos:
+                list_of_suggested_taboos[w] = 1
+            else:
+                list_of_suggested_taboos[w] += 1
+
+        f.seek(0)
+        json.dump(list_of_suggested_taboos, f)
 
 class OrdinaryUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
 
-        Labe = Label(self, text='Correct Login, Welcome Ordinary User!', font="Times 25 bold")
-        Labe.pack(padx=15, pady=5)
+        self.welcome_label = Label(self, text='Welcome Ordinary User!', font="Times 25 bold")
+        self.welcome_label.pack(padx=15, pady=5)
 
         fra = Frame(self)
 
@@ -355,7 +384,7 @@ class OrdinaryUserPage(Frame):
         but5 = Button(fra, text='File Complaints', command=lambda: controller.show_frame(File_Complaints))
         but5.pack(side=TOP, padx=10, pady=5)
 
-        but6 = Button(fra, text='Suggest Taboo words', command=lambda: controller.show_frame(Taboo_Word_Suggestions_OU))
+        but6 = Button(fra, text='Suggest Taboo words', command=lambda: controller.show_frame(Taboo_Word_Suggestions))
         but6.pack(side=TOP, padx=9, pady=5)
 
         Labe1 = Label(fra, text='Recent Documents: ', font="Times 25 bold")
@@ -580,31 +609,6 @@ class File_Complaints(Frame):
         button0.pack(side=TOP, pady = 5)
 
 
-class Taboo_Word_Suggestions_OU(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent, bg='yellow')
-
-        cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(OrdinaryUserPage))
-        cancel_button.pack(side=BOTTOM)
-        tw_label = Label(self, text="** You are about to send a list of taboo words ** ")
-        tw_label.pack(side=TOP)
-
-        tw_label1 = Label(self, text="Enter taboo words (one word per line): ")
-        tw_label1.pack(side=TOP)
-
-        self.tw_entry1 = Text(self, bd=5)
-
-        self.tw_entry1.pack(side=TOP)
-
-        button2 = Button(self, text='submit', command=self.Retrieve_Taboo_words)
-        button2.pack(side=TOP)
-
-
-    def Retrieve_Taboo_words(self):
-        result = self.tw_entry1.get("1.0", 'end-3c')
-        print(result)
-
-
 class Your_Documents_SU(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
@@ -646,8 +650,8 @@ class SuperUserPage(Frame):
         fr = Frame(self)
         rd_Frame = Frame(self)
 
-        Lab = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
-        Lab.pack(padx=15, pady=5)
+        self.welcome_label = Label(self, text='Correct Login, Welcome Super User!', font="Times 25 bold")
+        self.welcome_label.pack(padx=15, pady=5)
 
         Lab0 = Label(fr, text='What would you like to do?', font="Times 16 bold")
         Lab0.pack(padx=15, pady=6)
@@ -719,26 +723,9 @@ class SuperUserPage(Frame):
             open(sys.path[0] + "/Document/" + new_file_name, "w")
             self.cnd_window.destroy()
 
-class ViewApplications(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent, bg='yellow')
-
-        va_label = Label(self, text= "Choose an application")
-        va_label.pack(side=TOP)
-        va_apps = ["APP 1", "APP 2", "APP 3"]
-        self.va_var = StringVar(self)
-        self.va_var.set(va_apps[0])
-        va_om = OptionMenu(self, self.va_var, *va_apps)
-        va_om.pack(side=TOP)
-        va_ok_button = Button(self, text='ok')
-        va_ok_button.pack(side=TOP)
-        va_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
-        va_cancel_button.pack(side=TOP)
-
 class ViewComplaints(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
-
         vc_label = Label(self, text= "Choose a complaint")
         vc_label.pack(side=TOP)
         vc_complaints = ["Complaint 1", "Complaint 2", "Complaint 3"]
@@ -751,6 +738,38 @@ class ViewComplaints(Frame):
 
         vc_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
         vc_cancel_button.pack(side=TOP)
+
+class ViewSuggestedTaboos(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        vtw_label = Label(self, text= "Taboo Words")
+        vtw_label.pack(side=TOP)
+        vtw_list = ["Fork", "Beach", "Damn"]
+        vtw_lb = Listbox(self)
+        vtw_lb.pack(side=TOP)
+        for item in vtw_list:
+            vtw_lb.insert(END, item)
+        vtw_add_button = Button(self, text='Add')
+        vtw_add_button.pack(side=TOP)
+        vtw_remove_button = Button(self, text='Remove')
+        vtw_remove_button.pack(side=TOP)
+        vtw_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        vtw_cancel_button.pack(side=TOP)
+
+class ViewApplications(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+        va_label = Label(self, text= "Choose an application")
+        va_label.pack(side=TOP)
+        va_apps = ["APP 1", "APP 2", "APP 3"]
+        self.va_var = StringVar(self)
+        self.va_var.set(va_apps[0])
+        va_om = OptionMenu(self, self.va_var, *va_apps)
+        va_om.pack(side=TOP)
+        va_ok_button = Button(self, text='ok')
+        va_ok_button.pack(side=TOP)
+        va_cancel_button = Button(self, text='Cancel', command=lambda: controller.show_frame(SuperUserPage))
+        va_cancel_button.pack(side=TOP)
 
 
 class ViewTabooWords(Frame):
