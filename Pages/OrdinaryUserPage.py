@@ -43,8 +43,8 @@ class OrdinaryUserPage(Frame):
         but5 = Button(fra, text='File Complaints', command=lambda: parent.show_frame(File_Complaints))
         but5.pack(side=TOP, padx=10, pady=5)
 
-        from Pages.GuestUserPage import Taboo_Word_Suggestions
-        but6 = Button(fra, text='Suggest Taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions))
+        # from Pages.GuestUserPage import Taboo_Word_Suggestions
+        but6 = Button(fra, text='Suggest Taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions_OU))
         but6.pack(side=TOP, padx=9, pady=5)
 
         Labe1 = Label(fra, text='Recent Documents: ', font="Times 25 bold")
@@ -306,3 +306,11 @@ class display_ou_info(Frame):
 
         dou_button1 = Button(self, text = "View profile")
         dou_button1.pack(side=TOP, padx = 6, pady = 4)
+
+from Pages.GuestUserPage import Taboo_Word_Suggestions
+class Taboo_Word_Suggestions_OU(Taboo_Word_Suggestions):
+    def __init__(self, parent):
+        Taboo_Word_Suggestions.__init__(self, parent)
+        cancel_button2 = Button(self, text="Go back", command=lambda: parent.show_frame(OrdinaryUserPage))
+        cancel_button2.pack(side=BOTTOM)
+        print("1", self, parent)
