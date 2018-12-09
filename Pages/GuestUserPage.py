@@ -174,8 +174,7 @@ class Taboo_Word_Suggestions(Frame):
         Frame.grid_columnconfigure(self, 0, weight=1)
 
         self.parent = parent
-        print(self, parent)
-        print(type(self) == Taboo_Word_Suggestions)
+
         if(type(self) == Taboo_Word_Suggestions):
             cancel_button = Button(self, text="Go back", command=lambda: parent.show_frame(GuestUserPage))
             cancel_button.pack(side=BOTTOM)

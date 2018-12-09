@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
+import json
 
 class SuperUserPage(Frame):
     def __init__(self, parent):
@@ -120,15 +121,56 @@ class ViewApplications(Frame):
 
         va_label = Label(self, text= "Choose an application")
         va_label.pack(side=TOP)
-        va_apps = ["APP 1", "APP 2", "APP 3"]
+
+        va_apps = self.retrieveApplications() # retrieve all applications as a dictionary
+        va_apps_keys = self.retrieveApplications().keys() # get keys from the dictionary
+        va_apps_keys_list = list(va_apps_keys) # turns set of keys into a list of keys
+
         self.va_var = StringVar(self)
-        self.va_var.set(va_apps[0])
-        va_om = OptionMenu(self, self.va_var, *va_apps)
+        self.va_var.set(va_apps_keys_list[0])
+        va_om = OptionMenu(self, self.va_var, *va_apps_keys_list)
         va_om.pack(side=TOP)
-        va_ok_button = Button(self, text='ok')
+        # va_ok_button = Button(self, text='ok', command=lambda: parent.show_frame(ViewAnApplication))
+        va_ok_button = Button(self, text='ok', command=lambda: self.va_set_and_go(va_apps) )
         va_ok_button.pack(side=TOP)
         va_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
         va_cancel_button.pack(side=TOP)
+
+    def va_set_and_go(self, all_apps):
+        va_var_selected = self.va_var.get()
+        an_app = all_apps[va_var_selected]
+        self.parent.show_frame(ViewAnApplication, va_var_selected, an_app)
+
+    def retrieveApplications(self):
+        try:
+            f = open('Databases/Applications/Applications.json', 'r+')
+            applications = json.load(f)
+            return applications
+        except FileNotFoundError:
+            messagebox.showerror('Error', 'This file does not exist!')
+
+class ViewAnApplication(Frame):
+    def __init__(self, parent, *args):
+        Frame.__init__(self, parent, bg='yellow')
+        Frame.pack(self, side="top", fill="both", expand=True)
+        Frame.grid_rowconfigure(self, 0, weight=1)
+        Frame.grid_columnconfigure(self, 0, weight=1)
+
+        v_an_app = Text(self)
+        v_an_app.insert(INSERT, args[0])
+        v_an_app.insert(END, '\n')
+        v_an_app.insert(INSERT, args[1])
+        v_an_app.config(state=DISABLED)
+        v_an_app.pack(side=TOP)
+
+        v_an_app_promote_button = Button(self, text='Promote')
+        v_an_app_promote_button.pack(side=TOP)
+
+        v_an_app_reject_button = Button(self, text='Reject')
+        v_an_app_reject_button.pack(side=TOP)
+
+        v_an_app_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(ViewApplications))
+        v_an_app_cancel_button.pack(side=TOP)
 
 class ViewTabooWords(Frame):
     def __init__(self, parent):
