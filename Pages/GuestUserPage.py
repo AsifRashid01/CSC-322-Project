@@ -175,9 +175,9 @@ class Taboo_Word_Suggestions(Frame):
 
         self.parent = parent
 
-        # from GuestUserPage import GuestUserPage
-        cancel_button = Button(self, text="Go back", command=lambda: parent.show_frame(GuestUserPage))
-        cancel_button.pack(side=BOTTOM)
+        if(type(self) == Taboo_Word_Suggestions):
+            cancel_button = Button(self, text="Go back", command=lambda: parent.show_frame(GuestUserPage))
+            cancel_button.pack(side=BOTTOM)
 
         tw_label = Label(self, text="** You are about to send a list of taboo words ** ")
         tw_label.pack(side=TOP)

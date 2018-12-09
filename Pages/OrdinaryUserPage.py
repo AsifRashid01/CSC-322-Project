@@ -43,8 +43,8 @@ class OrdinaryUserPage(Frame):
         but5 = Button(fra, text='File Complaints', command=lambda: parent.show_frame(File_Complaints))
         but5.pack(side=TOP, padx=10, pady=5)
 
-        from Pages.GuestUserPage import Taboo_Word_Suggestions
-        but6 = Button(fra, text='Suggest Taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions))
+        # from Pages.GuestUserPage import Taboo_Word_Suggestions
+        but6 = Button(fra, text='Suggest Taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions_OU))
         but6.pack(side=TOP, padx=9, pady=5)
 
         Labe1 = Label(fra, text='Recent Documents: ', font="Times 25 bold")
@@ -78,7 +78,7 @@ class Your_Documents_OU(Frame):
 
         self.parent = parent
 
-        back_button = Button(self, text="Back to OU Home Page", command=lambda: parent.show_frame(OrdinaryUserPage))
+        back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
         back_button.pack(side=BOTTOM)
         yd_label = Label(self, text= "Choose Document")
         yd_label.pack(side=TOP)
@@ -106,9 +106,6 @@ class Your_Documents_OU(Frame):
 
         button2 = Button(self, text='submit', command = self.doc_decision_ou)
         button2.pack(side=TOP)
-
-        button3 = Button(self, text='go back')
-        button3.pack(side=TOP)
 
     def doc_decision_ou(self):
         F = open(sys.path[0] + "/Document/" + self.Var_get, "r")
@@ -150,13 +147,20 @@ class File_Complaints(Frame):
 
         label0 = Label(self, text = "Select Document:")
         label0.pack(side=TOP)
+
         fc_options = os.listdir(sys.path[0] + "/Document/")
+
         self.variable = StringVar(self)
         self.variable.set(fc_options[0])
+
         w = OptionMenu(self, self.variable, *fc_options)
         w.pack(side=TOP)
+
         button1 = Button(self, text = "ok", command=self.Complain_About)
         button1.pack(side=TOP)
+
+        cnd_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        cnd_back_button.pack(side=BOTTOM)
 
     def Complain_About(self):
         T = Text(self, height = 3, width = 30)
@@ -178,11 +182,13 @@ class create_new_document(Frame):
         self.parent = parent
 
         cnd_label = Label(self, text= "Enter file name:")
-        cnd_label.pack(side = LEFT)
+        cnd_label.pack(side = TOP)
         self.cnd_entry = Entry(self, bd = 5)
-        self.cnd_entry.pack(side = LEFT)
+        self.cnd_entry.pack(side = TOP)
         cnd_button = Button(self, text='Submit')
-        cnd_button.pack(side = LEFT)
+        cnd_button.pack(side = TOP)
+        cnd_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        cnd_back_button.pack(side=TOP)
 
     def create_new_document(self):
         new_file_name = self.cnd_entry.get() + ".txt"
@@ -204,13 +210,19 @@ class invite_ou_window(Frame):
 
         iou_label = Label(self, text="Who would you like to invite: ")
         iou_label.pack(side=TOP)
+
         options = ["User1", "User2", "User3"]
-        iou_button = Button(self, text='Invite')
-        iou_button.pack(side=RIGHT)
         variable = StringVar(self)
         variable.set(options[0])
+
         w = OptionMenu(self, variable, *options)
         w.pack(side=TOP)
+
+        iou_button = Button(self, text='Invite')
+        iou_button.pack(side=TOP)
+
+        iow_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        iow_back_button.pack(side=TOP)
 
 class accept_decline_invites(Frame):
     def __init__(self, parent):
@@ -226,14 +238,18 @@ class accept_decline_invites(Frame):
         options = ["doc1.txt", "doc2.txt", "doc3.txt"]
         variable = StringVar(self)
         variable.set(options[0])
+
         w = OptionMenu(self, variable, *options)
         w.pack(side=TOP)
-        adi_button0 = Button(self, text = 'Cancel')
-        adi_button0.pack(side=LEFT, padx = 6, pady = 4)
+
+        adi_button0 = Button(self, text = 'Cancel', command=lambda: parent.show_frame(OrdinaryUserPage))
+        adi_button0.pack(side=TOP, padx = 6, pady = 4)
+
         adi_button1 = Button(self, text = 'Accept')
-        adi_button1.pack(side=LEFT, padx = 6, pady =4)
+        adi_button1.pack(side=TOP, padx = 6, pady =4)
+
         adi_button2 = Button(self, text = 'Decline')
-        adi_button2.pack(side=LEFT, padx = 6, pady = 4)
+        adi_button2.pack(side=TOP, padx = 6, pady = 4)
 
 class get_info_ou(Frame):
     def __init__(self, parent):
@@ -246,16 +262,21 @@ class get_info_ou(Frame):
 
         gio_label0 = Label(self, text = "Enter OU's Name:")
         gio_label0.pack(side=TOP)
+
         self.gio_entry0 = Entry(self, bd = 5)
         self.gio_entry0.pack(side=TOP)
+
         gio_label1 = Label(self, text = "Interests: ")
         gio_label1.pack(side=TOP)
+
         self.gio_entry1 = Entry(self, bd =5)
         self.gio_entry1.pack(side=TOP)
-        gio_button0 = Button(self, text = "cancel")
-        gio_button0.pack(side=LEFT, padx = 6, pady = 4)
+
+        gio_button0 = Button(self, text = "cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        gio_button0.pack(side=TOP, padx = 6, pady = 4)
+
         gio_button1 = Button(self, text = "search", command=lambda: parent.show_frame(display_ou_info))
-        gio_button1.pack(side=LEFT, padx = 6, pady = 4)
+        gio_button1.pack(side=TOP, padx = 6, pady = 4)
 
 class display_ou_info(Frame):
     def __init__(self, parent):
@@ -280,7 +301,16 @@ class display_ou_info(Frame):
         #     w = OptionMenu(self, variable, *users)
         #     w.pack(side=TOP)
 
-        dou_button0 = Button(self, text = "Cancel")
-        dou_button0.pack(side=LEFT, padx = 6, pady = 4)
+        dou_button0 = Button(self, text = "Cancel", command=lambda: parent.show_frame(OrdinaryUserPage) )
+        dou_button0.pack(side=TOP, padx = 6, pady = 4)
+
         dou_button1 = Button(self, text = "View profile")
-        dou_button1.pack(side=LEFT, padx = 6, pady = 4)
+        dou_button1.pack(side=TOP, padx = 6, pady = 4)
+
+from Pages.GuestUserPage import Taboo_Word_Suggestions
+class Taboo_Word_Suggestions_OU(Taboo_Word_Suggestions):
+    def __init__(self, parent):
+        Taboo_Word_Suggestions.__init__(self, parent)
+        cancel_button2 = Button(self, text="Go back", command=lambda: parent.show_frame(OrdinaryUserPage))
+        cancel_button2.pack(side=BOTTOM)
+        print("1", self, parent)

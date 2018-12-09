@@ -7,9 +7,9 @@ class Application(Tk):
         self._frame = None
         self.show_frame(LoginPage)
 
-    def show_frame(self, frame_class):
+    def show_frame(self, frame_class, *args):
         """Destroys current frame and replaces it with a new one."""
-        new_frame = frame_class(self)
+        new_frame = frame_class(self, *args)
         if self._frame is not None:
             self._frame.destroy()
         self._frame = new_frame

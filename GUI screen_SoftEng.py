@@ -4,6 +4,7 @@
 #python 3:
 from tkinter import *                                                      # Using Tkinter for GUI properties
 from tkinter import messagebox                                             # Importing MessageBox module
+from tkinter import scrolledtext
 import sys
 import os
 import json
@@ -26,7 +27,7 @@ class Application(Tk):
                   Your_Documents_OU, Your_Documents_SU, Documents_GU, Taboo_Word_Suggestions,
                   ViewApplications, ViewTabooWords, ViewSuggestedTaboos, Apply_GU_to_OU, CreateGuestUserAccount, ViewComplaints,
                   RemoveOU, Recent_Documents_OU, File_Complaints,
-                  create_new_document, invite_ou_window, accept_decline_invites, get_info_ou, display_ou_info):
+                  create_new_document_OU, create_new_document_SU, invite_ou_window, accept_decline_invites, get_info_ou, display_ou_info):
 
             frame = F(container, self)
             self.frames[F] = frame
@@ -173,7 +174,6 @@ class CreateGuestUserAccount(Frame):
 class GuestUserPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='green')
-        print(Application.current_logged_in_user)
 
         self.welcome_label = Label(self, text='Welcome Guest User', font="Times 25 bold")
         self.welcome_label.pack(padx=15, pady=5)
@@ -234,7 +234,6 @@ class Apply_GU_to_OU(Frame):
         agu_button.pack(side=TOP)
         cancel_button = Button(self, text="Cancel", command=lambda: controller.show_frame(GuestUserPage))
         cancel_button.pack(side=BOTTOM)
-        print(Application.current_logged_in_user)
 
     def submit_application(self):
         formatted_application = {Application.current_logged_in_user: {"First name": self.agu_entry1.get(),
@@ -351,7 +350,7 @@ class OrdinaryUserPage(Frame):
         but_0 = Button(fra, text='Your Documents', command=lambda: controller.show_frame(Your_Documents_OU))
         but_0.pack(side=TOP, padx=4, pady=5)
 
-        but0 = Button(fra, text='Create new document', command=lambda: controller.show_frame(create_new_document))
+        but0 = Button(fra, text='Create new document', command=lambda: controller.show_frame(create_new_document_OU))
         but0.pack(side=TOP, padx=5, pady=5)
 
         but1 = Button(fra, text='Invite OUs', command=lambda: controller.show_frame(invite_ou_window))
@@ -399,44 +398,61 @@ class Your_Documents_OU(Frame):
 
         back_button = Button(self, text="Back to OU Home Page", command=lambda: controller.show_frame(OrdinaryUserPage))
         back_button.pack(side=BOTTOM)
-        yd_label = Label(self, text= "Choose Document")
-        yd_label.pack(side=TOP)
-        #yd_options = ["Doc 1", "Doc 2", "Doc 3"]
-        yd_options = os.listdir(sys.path[0] + "/Document/")
+        docs_label = Label(self, text= "Choose Document")
+        docs_label.pack(side=TOP)
+
+        doc_options = [x for x in os.listdir("Document") if x[-4:] == ".txt"] # list of files in Document folder that end in .txt.
+
         self.variable = StringVar(self)
-        self.variable.set(yd_options[0])
-        w = OptionMenu(self, self.variable, *yd_options)
-        w.pack(side=TOP)
-        self.button1 = Button(self, text='ok', command= self.doc_selection)
-        self.button1.pack(side=TOP)
+        self.variable.set(doc_options[0])
+        w1 = OptionMenu(self, self.variable, *doc_options)
+        w1.pack(side=TOP)
 
-    def doc_selection(self):
-        #print(self.variable.get())
-        self.button1['state'] = 'disabled'
-        self.Var_get = self.variable.get()
-        yd_label2 = Label(self, text="What would you like to do?")
-        yd_label2.pack(side=TOP)
-        yd_options2 = ["Read Doc", "Edit Doc", "Send suggestions (taboo words)", "retrieve older versions",
-                       "Invite other OUs", "change privacy settings"]
-        variable2 = StringVar(self)
-        variable2.set(yd_options2[0])
-        w = OptionMenu(self, variable2, *yd_options2)
-        w.pack(side=TOP)
+        action_label = Label(self, text="What would you like to do?")
+        action_label.pack(side=TOP)
+        action_options = ["Read", "Lock", "Edit", "Unlock", "Retrieve previous versions",
+                           "View collaborators", "Change mode"]
 
-        button2 = Button(self, text='submit', command = self.doc_decision_ou)
+        self.variable2 = StringVar(self)
+        self.variable2.set(action_options[0])
+        w2 = OptionMenu(self, self.variable2, *action_options)
+        w2.pack(side=TOP)
+
+        button2 = Button(self, text='OK', command = self.doc_decision)
         button2.pack(side=TOP)
 
-        button3 = Button(self, text='go back')
-        button3.pack(side=TOP)
+        self.mytext = scrolledtext.ScrolledText(self, font=("Helvetica", 10))
+        self.mytext.pack(expand=TRUE, fill=Y)
+        self.mytext.configure(state="disabled") # initially, the text box is disabled
 
-    def doc_decision_ou(self):
-        F = open(sys.path[0] + "/Document/" + self.Var_get, "r")
-        a = F.read()
-        print (a)
-        yd_label = Label(self, text= a)
-        yd_label.pack(side=TOP)
+    def document_info(self, document_name):
+        f = open("Databases/Documents/Unshared documents.json", "r")
+        g = open("Databases/Documents/Shared documents.json", "r")
+        unshared_docs = json.load(f)
+        shared_docs = json.load(g)
+        
+        if document_name in unshared_docs:
+            return unshared_docs[document_name]
+        elif document_name in shared_docs:
+            return shared_docs[document_name]
+        else:
+            messagebox.showerror('Error', 'File is missing.')
 
+        f.close()
 
+    def doc_decision(self):
+        doc_name = self.variable.get()
+        action_name = self.variable2.get()
+
+        if action_name == "Read":
+            f = open("Document/" + doc_name, "r")
+            contents = f.read()
+            self.mytext.configure(state="normal") # reenable text box to update its contents
+            self.mytext.delete(1.0,END) # delete old contents
+            self.mytext.insert(INSERT, contents) # insert new contents
+            self.mytext.configure(state="disabled") # disable text box again
+            f.close()
+        #elif action_name == "Lock":
 
 class Recent_Documents_OU(Frame):
      def __init__(self, parent, controller):
@@ -513,24 +529,86 @@ class Your_Documents_SU(Frame):
         button3 = Button(self, text='go back')
         button3.pack(side=TOP)
 
-class create_new_document(Frame):
+class create_new_document_OU(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg='yellow')
+
+        back_button = Button(self, text="Back to Home Page", command=lambda: controller.show_frame(OrdinaryUserPage))
+
+        back_button.pack(side=BOTTOM)
+
         cnd_label = Label(self, text= "Enter file name:")
         cnd_label.pack(side = LEFT)
+
         self.cnd_entry = Entry(self, bd = 5)
         self.cnd_entry.pack(side = LEFT)
-        cnd_button = Button(self, text='Submit')
+        cnd_button = Button(self, text='Create', command=self.create_doc)
         cnd_button.pack(side = LEFT)
 
-    def create_new_document(self):
-        new_file_name = self.cnd_entry.get() + ".txt"
+    def create_doc(self):
+        new_file_name = self.cnd_entry.get()
         file_names = os.listdir(sys.path[0] + "/Document")
-        if new_file_name in file_names:
-            #python 3:
-            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
+        if (new_file_name + ".txt") not in file_names:
+            open("Document/" + new_file_name + ".txt", "w") # save document.txt
+
+            # save information of the newly created document:
+            # first initialize the JSON file if it doesn't yet exist:
+            if not os.path.isfile("Databases/Documents/Unshared documents.json"):
+                f = open("Databases/Documents/Unshared documents.json", "w")
+                json.dump({}, f)
+                f.close()
+
+            # now read the file and update its contents:
+            f = open("Databases/Documents/Unshared documents.json", "r+")
+            d = json.load(f)
+            d.update({new_file_name: [Application.current_logged_in_user, 1, "Private"]}) # doc_name: [doc_owner, version #, doc_mode]
+            f.seek(0)
+            json.dump(d, f, sort_keys=True)
+            f.close()
+
+            # show success message:
+            messagebox.showinfo("Success", new_file_name + " created.")
         else:
-            open(sys.path[0] + "/Document/" + new_file_name, "w")
+            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
+
+# only difference between create_new_document_OU and create_new_document_SU is the back to homepage button's action
+class create_new_document_SU(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg='yellow')
+
+        back_button = Button(self, text="Back to Home Page", command=lambda: controller.show_frame(SuperUserPage))
+
+        back_button.pack(side=BOTTOM)
+
+        cnd_label = Label(self, text= "Enter file name:")
+        cnd_label.pack(side = LEFT)
+
+        self.cnd_entry = Entry(self, bd = 5)
+        self.cnd_entry.pack(side = LEFT)
+        cnd_button = Button(self, text='Create', command=self.create_doc)
+        cnd_button.pack(side = LEFT)
+
+    def create_doc(self):
+        new_file_name = self.cnd_entry.get()
+        file_names = os.listdir(sys.path[0] + "/Document")
+        if (new_file_name + ".txt") not in file_names:
+            open("Document/" + new_file_name + ".txt", "w")
+
+            if not os.path.isfile("Databases/Documents/Unshared documents.json"):
+                f = open("Databases/Documents/Unshared documents.json", "w")
+                json.dump({}, f)
+                f.close()
+
+            f = open("Databases/Documents/Unshared documents.json", "r+")
+            d = json.load(f)
+            d.update({new_file_name: [Application.current_logged_in_user, 1, "Private"]})
+            f.seek(0)
+            json.dump(d, f, sort_keys=True)
+            f.close()
+
+            messagebox.showinfo("Success", new_file_name + " created.")
+        else:
+            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
 
 class invite_ou_window(Frame):
     def __init__(self, parent, controller):
@@ -657,28 +735,28 @@ class SuperUserPage(Frame):
         button = Button(self, text="Visit Login User Page", command=lambda: controller.show_frame(LoginPage))
         button.pack()
 
-    def create_new_document_window(self):
-        cnd_window = Tk()
-        cnd_fram = Frame(cnd_window)
-        cnd_label = Label(cnd_fram, text="Enter file name:")
-        cnd_label.pack(side=LEFT)
-        self.cnd_entry = Entry(cnd_fram, bd=5)
-        self.cnd_entry.pack(side=RIGHT)
-        cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
-        cnd_button.pack(side=RIGHT)
-        cnd_fram.pack()
-        cnd_window.mainloop()
+#    def create_new_document_window(self):
+#        cnd_window = Tk()
+#        cnd_fram = Frame(cnd_window)
+#        cnd_label = Label(cnd_fram, text="Enter file name:")
+#        cnd_label.pack(side=LEFT)
+#        self.cnd_entry = Entry(cnd_fram, bd=5)
+#        self.cnd_entry.pack(side=RIGHT)
+#        cnd_button = Button(cnd_fram, text='Submit', command=self.create_new_document)
+#        cnd_button.pack(side=RIGHT)
+#        cnd_fram.pack()
+#        cnd_window.mainloop()
 
-    def create_new_document(self):
-        new_file_name = self.cnd_entry.get() + ".txt"
-        #file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
-        file_names = os.listdir(sys.path[0] + "/Document")
-        if new_file_name in file_names:
-            print(new_file_name)
-        else:
-            #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
-            open(sys.path[0] + "/Document/" + new_file_name, "w")
-            self.cnd_window.destroy()
+#    def create_new_document(self):
+#        new_file_name = self.cnd_entry.get() + ".txt"
+#        #file_names = os.listdir("/Users/rafey7/Desktop/CSC-322-Project/Document/")
+#        file_names = os.listdir(sys.path[0] + "/Document")
+#        if new_file_name in file_names:
+#            print(new_file_name)
+#        else:
+#            #open("/Users/rafey7/Desktop/CSC-322-Project/Document/" + new_file_name, "w")
+#            open(sys.path[0] + "/Document/" + new_file_name, "w")
+#            self.cnd_window.destroy()
 
 class ViewComplaints(Frame):
     def __init__(self, parent, controller):

@@ -29,7 +29,6 @@ class LoginPage(Frame):
 
 
         # Button to click to check login credentials
-        # btn = Button(self, text='Check Login', command=self.RegisteredUserLogin(parent))
         btn = Button(self, text='Check Login', command=self.RegisteredUserLogin)
 
         # Button to log in as a guest
@@ -39,7 +38,6 @@ class LoginPage(Frame):
         btn.pack(padx=5)
         btn2.pack(padx=6)
 
-    # def RegisteredUserLogin(self, parent):
     def RegisteredUserLogin(self):
         username = self.entry1.get()
         password = self.entry2.get()
@@ -64,9 +62,8 @@ class LoginPage(Frame):
         if username in GU_dict and password == GU_dict[username] or username == 'g' and password == 'g':
             from Pages.GuestUserPage import GuestUserPage
             self.parent.show_frame(GuestUserPage)
-            # self.show_frame(GuestUserPage)
             Application.current_logged_in_user = username
-            # Application._frame.welcome_label.config(text='Welcome Guest User ' + Application.current_logged_in_user)
+            # app._frame.welcome_label.config(text='Welcome Guest User ' + Application.current_logged_in_user)
         elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
             from Pages.OrdinaryUserPage import OrdinaryUserPage
             self.parent.show_frame(OrdinaryUserPage)
