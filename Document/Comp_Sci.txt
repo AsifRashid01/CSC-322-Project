@@ -1,2 +1,0 @@
-cout<< hello<<endl
-Hey whats up
