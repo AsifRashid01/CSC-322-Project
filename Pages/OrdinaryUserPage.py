@@ -1,7 +1,10 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import scrolledtext
+from Application import Application
 import sys
 import os
+import json
 
 class OrdinaryUserPage(Frame):
     def __init__(self, parent):
@@ -25,7 +28,8 @@ class OrdinaryUserPage(Frame):
         but_0 = Button(fra, text='Your Documents', command=lambda: parent.show_frame(Your_Documents_OU))
         but_0.pack(side=TOP, padx=4, pady=5)
 
-        but0 = Button(fra, text='Create new document', command=lambda: parent.show_frame(create_new_document))
+        # but0 = Button(fra, text='Create new document', command=lambda: parent.show_frame(create_new_document))
+        but0 = Button(fra, text='Create new document', command=lambda: parent.show_frame(create_new_document_OU))
         but0.pack(side=TOP, padx=5, pady=5)
 
         but1 = Button(fra, text='Invite OUs', command=lambda: parent.show_frame(invite_ou_window))
@@ -78,41 +82,106 @@ class Your_Documents_OU(Frame):
 
         self.parent = parent
 
-        back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        # create Unshared documents.json and Shared documents.json if they have not yet been created
+        if not os.path.isfile("Databases/Documents/Unshared documents.json"):
+            f = open("Databases/Documents/Unshared documents.json", "w")
+            json.dump({}, f)
+            f.close()
+        if not os.path.isfile("Databases/Documents/Shared documents.json"):
+            f = open("Databases/Documents/Shared documents.json", "w")
+            json.dump({}, f)
+            f.close()
+
+        back_button = Button(self, text="Back to OU Home Page", command=lambda: parent.show_frame(OrdinaryUserPage))
         back_button.pack(side=BOTTOM)
-        yd_label = Label(self, text= "Choose Document")
-        yd_label.pack(side=TOP)
-        #yd_options = ["Doc 1", "Doc 2", "Doc 3"]
-        yd_options = os.listdir(sys.path[0] + "/Document/")
+        docs_label = Label(self, text= "Choose Document")
+        docs_label.pack(side=TOP)
+
+       # doc_options = [x for x in os.listdir("Document") if x[-4:] == ".txt"] # list of files in Document folder that end in .txt.
+        doc_options = []
+        f1 = open("Databases/Documents/Unshared documents.json", "r")
+        f2 = open("Databases/Documents/Shared documents.json", "r")
+        unshared_docs = json.load(f1)
+        shared_docs = json.load(f2)
+        f1.close(); f2.close()
+
+        for key, value in unshared_docs.items():
+            if value[0] == Application.current_logged_in_user:
+                doc_options.append(key)
+
+        self.docinfo_label = Label(self, text="Owner:\nVersion:\nMode:", justify=LEFT, font = ("Courier", 11))
+
         self.variable = StringVar(self)
-        self.variable.set(yd_options[0])
-        w = OptionMenu(self, self.variable, *yd_options)
-        w.pack(side=TOP)
-        self.button1 = Button(self, text='ok', command= self.doc_selection)
-        self.button1.pack(side=TOP)
+        if doc_options != []:
+            self.variable.set(doc_options[0])
+            self.w1 = OptionMenu(self, self.variable, *doc_options, command=self.update_info_label)
+            self.w1.pack(side=TOP)
+            # update info label
+            info = self.document_info(doc_options[0])
+            if info != False:
+                self.docinfo_label['text'] = 'Owner: {}\nVersion: {}\nMode: {}'.format(info[0], info[1], info[2])
+        else: # if there are no documents
+            self.variable.set('')
+            self.w1 = OptionMenu(self, self.variable, [], command=self.update_info_label)
+            self.w1.pack(side=TOP)        
 
-    def doc_selection(self):
-        #print(self.variable.get())
-        self.button1['state'] = 'disabled'
-        self.Var_get = self.variable.get()
-        yd_label2 = Label(self, text="What would you like to do?")
-        yd_label2.pack(side=TOP)
-        yd_options2 = ["Read Doc", "Edit Doc", "Send suggestions (taboo words)", "retrieve older versions",
-                       "Invite other OUs", "change privacy settings"]
-        variable2 = StringVar(self)
-        variable2.set(yd_options2[0])
-        w = OptionMenu(self, variable2, *yd_options2)
-        w.pack(side=TOP)
+        self.docinfo_label.pack(pady=9, side=TOP)
 
-        button2 = Button(self, text='submit', command = self.doc_decision_ou)
+        action_label = Label(self, text="What would you like to do?")
+        action_label.pack(side=TOP, padx=5, pady=5)
+        action_options = ["Read", "Lock", "Edit", "Unlock", "Change mode", "Retrieve previous versions", "View collaborators"]
+
+        self.variable2 = StringVar(self)
+        self.variable2.set(action_options[0])
+        w2 = OptionMenu(self, self.variable2, *action_options)
+        w2.pack(side=TOP)
+
+        button2 = Button(self, text='OK', command = self.doc_decision)
         button2.pack(side=TOP)
 
-    def doc_decision_ou(self):
-        F = open(sys.path[0] + "/Document/" + self.Var_get, "r")
-        a = F.read()
-        print (a)
-        yd_label = Label(self, text= a)
-        yd_label.pack(side=TOP)
+        self.mytext = scrolledtext.ScrolledText(self, font=("Times", 10))
+        self.mytext.pack(expand=TRUE, fill=Y)
+        self.mytext.configure(state="disabled") # initially, the text box is disabled
+
+    def document_info(self, document_name):
+        f = open("Databases/Documents/Unshared documents.json", "r")
+        g = open("Databases/Documents/Shared documents.json", "r")
+        unshared_docs = json.load(f)
+        shared_docs = json.load(g)
+
+        if document_name in unshared_docs:
+            return unshared_docs[document_name]
+        elif document_name in shared_docs: 
+            return shared_docs[document_name]
+        else: # document could not be found
+            return False
+
+        f.close()
+
+    def update_info_label(self, event):
+        doc_info = self.document_info(self.variable.get())
+        if doc_info != False:
+            if doc_info[2] == 'Shared':
+                self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
+                                              'Collaborators: {}\nLock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+            else:
+                self.docinfo_label['text'] = 'Owner: {}\nVersion: {}\nMode: {}'.format(doc_info[0], doc_info[1], doc_info[2])
+
+    def doc_decision(self):
+        doc_name = self.variable.get()
+        action_name = self.variable2.get()
+        if doc_name == '':
+            return
+
+        if action_name == "Read":
+            f = open("Document/" + doc_name + ".txt", "r")
+            contents = f.read()
+            self.mytext.configure(state="normal") # reenable text box to update its contents
+            self.mytext.delete(1.0,END) # delete old contents
+            self.mytext.insert(INSERT, contents) # insert new contents
+            self.mytext.configure(state="disabled") # disable text box again
+            f.close()
+        #elif action_name == "Lock":
 
 class Recent_Documents_OU(Frame):
      def __init__(self, parent):
@@ -172,32 +241,82 @@ class File_Complaints(Frame):
         button0 = Button(self, text = "Submit")
         button0.pack(side=TOP, pady = 5)
 
-class create_new_document(Frame):
+# class create_new_document(Frame):
+#     def __init__(self, parent):
+#         Frame.__init__(self, parent, bg='yellow')
+#         Frame.pack(self, side="top", fill="both", expand=True)
+#         Frame.grid_rowconfigure(self, 0, weight=1)
+#         Frame.grid_columnconfigure(self, 0, weight=1)
+#
+#         self.parent = parent
+#
+#         cnd_label = Label(self, text= "Enter file name:")
+#         cnd_label.pack(side = TOP)
+#         self.cnd_entry = Entry(self, bd = 5)
+#         self.cnd_entry.pack(side = TOP)
+#         cnd_button = Button(self, text='Submit')
+#         cnd_button.pack(side = TOP)
+#         cnd_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+#         cnd_back_button.pack(side=TOP)
+#
+#     def create_new_document(self):
+#         new_file_name = self.cnd_entry.get() + ".txt"
+#         file_names = os.listdir(sys.path[0] + "/Document")
+#         if new_file_name in file_names:
+#             #python 3:
+#             messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
+#         else:
+#             open(sys.path[0] + "/Document/" + new_file_name, "w")
+
+class create_new_document_OU(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent, bg='yellow')
         Frame.pack(self, side="top", fill="both", expand=True)
         Frame.grid_rowconfigure(self, 0, weight=1)
         Frame.grid_columnconfigure(self, 0, weight=1)
 
-        self.parent = parent
+        back_button = Button(self, text="Back to Home Page", command=lambda: parent.show_frame(OrdinaryUserPage))
+        back_button.pack(side=BOTTOM)
 
         cnd_label = Label(self, text= "Enter file name:")
-        cnd_label.pack(side = TOP)
-        self.cnd_entry = Entry(self, bd = 5)
-        self.cnd_entry.pack(side = TOP)
-        cnd_button = Button(self, text='Submit')
-        cnd_button.pack(side = TOP)
-        cnd_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
-        cnd_back_button.pack(side=TOP)
+        cnd_label.pack(side = LEFT)
 
-    def create_new_document(self):
-        new_file_name = self.cnd_entry.get() + ".txt"
-        file_names = os.listdir(sys.path[0] + "/Document")
-        if new_file_name in file_names:
-            #python 3:
-            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
+        self.cnd_entry = Entry(self, bd = 5)
+        self.cnd_entry.pack(side = LEFT)
+        cnd_button = Button(self, text='Create', command=self.create_doc)
+        cnd_button.pack(side = LEFT)
+
+    def create_doc(self):
+        new_file_name = self.cnd_entry.get()
+        file_names = os.listdir("Document")
+
+        if (new_file_name + ".txt") not in file_names:
+            open("Document/" + new_file_name + ".txt", "w") # save document.txt
+
+            # We also have to save the information of the newly created (private) document in 'Unshared documents.json':
+
+            # at this point, initialize the document DB files if they don't yet exist:
+            if not os.path.isfile("Databases/Documents/Unshared documents.json"):
+                f = open("Databases/Documents/Unshared documents.json", "w")
+                json.dump({}, f)
+                f.close()
+            if not os.path.isfile("Databases/Documents/Shared documents.json"):
+                f = open("Databases/Documents/Shared documents.json", "w")
+                json.dump({}, f)
+                f.close()
+
+            # now open the file and update its contents with the new entry:
+            f = open("Databases/Documents/Unshared documents.json", "r+")
+            d = json.load(f)
+            d.update({new_file_name: [Application.current_logged_in_user, 1, "Private"]}) # doc_name: [doc_owner, version #, doc_mode]
+            f.seek(0)
+            json.dump(d, f, sort_keys=True)
+            f.close()
+
+            # show success message:
+            messagebox.showinfo("Success", new_file_name + " created.")
         else:
-            open(sys.path[0] + "/Document/" + new_file_name, "w")
+            messagebox.showerror('Error', 'Can\'t create file. File name already exists.')
 
 class invite_ou_window(Frame):
     def __init__(self, parent):
