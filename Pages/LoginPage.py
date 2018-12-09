@@ -64,7 +64,7 @@ class LoginPage(Frame):
             self.parent.show_frame(GuestUserPage)
             Application.current_logged_in_user = username
             # app._frame.welcome_label.config(text='Welcome Guest User ' + Application.current_logged_in_user)
-        elif username in OU_dict and password == OU_dict[username[0]] or username == 'o' and password == 'o':
+        elif username in OU_dict and password == OU_dict[username]["password"] or username == 'o' and password == 'o':
             from Pages.OrdinaryUserPage import OrdinaryUserPage
             self.parent.show_frame(OrdinaryUserPage)
             Application.current_logged_in_user = username

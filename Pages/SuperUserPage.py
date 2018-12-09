@@ -127,12 +127,13 @@ class ViewApplications(Frame):
         va_apps_keys_list = list(va_apps_keys) # turns set of keys into a list of keys
 
         self.va_var = StringVar(self)
-        self.va_var.set(va_apps_keys_list[0])
-        va_om = OptionMenu(self, self.va_var, *va_apps_keys_list)
-        va_om.pack(side=TOP)
-        # va_ok_button = Button(self, text='ok', command=lambda: parent.show_frame(ViewAnApplication))
-        va_ok_button = Button(self, text='ok', command=lambda: self.va_set_and_go(va_apps) )
-        va_ok_button.pack(side=TOP)
+        if (len(va_apps) != 0):
+            self.va_var.set(va_apps_keys_list[0])
+            va_om = OptionMenu(self, self.va_var, *va_apps_keys_list)
+            va_om.pack(side=TOP)
+            va_ok_button = Button(self, text='ok', command=lambda: self.va_set_and_go(va_apps) )
+            va_ok_button.pack(side=TOP)
+
         va_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
         va_cancel_button.pack(side=TOP)
 
@@ -145,6 +146,7 @@ class ViewApplications(Frame):
         try:
             f = open('Databases/Applications/Applications.json', 'r+')
             applications = json.load(f)
+            f.close()
             return applications
         except FileNotFoundError:
             messagebox.showerror('Error', 'This file does not exist!')
@@ -163,14 +165,51 @@ class ViewAnApplication(Frame):
         v_an_app.config(state=DISABLED)
         v_an_app.pack(side=TOP)
 
-        v_an_app_promote_button = Button(self, text='Promote')
+        v_an_app_promote_button = Button(self, text='Accept', command=lambda: self.accept_an_app(args[0], args[1]))
         v_an_app_promote_button.pack(side=TOP)
 
-        v_an_app_reject_button = Button(self, text='Reject')
+        v_an_app_reject_button = Button(self, text='Reject', command=lambda: self.reject_an_app(args[0]))
         v_an_app_reject_button.pack(side=TOP)
 
         v_an_app_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(ViewApplications))
         v_an_app_cancel_button.pack(side=TOP)
+
+    def reject_an_app(self, *args):
+        try:
+            f = open('Databases/Applications/Applications.json', 'r+')
+            apps = json.load(f)
+            apps.pop(args[0])
+            f.seek(0)
+            f.truncate()
+            json.dump(apps, f, sort_keys=True)
+            f.close()
+        except:
+            messagebox.showerror('Error', 'Something went wrong!')
+
+    def accept_an_app(self, *args):
+        f = open('Databases/Users/GU.json', 'r+') #retrieve all username:passwords from GU.json file
+
+        gu = json.load(f) # turns the json data into a python dictionary
+        gu_pass = gu[args[0]] # retrieves the applicants password
+        args[1]["password"] = gu_pass #insert the applicants password to dictionarys
+
+        gu.pop(args[0]) # removes the GU's username:password from the gu dictionary
+        f.seek(0)
+        f.truncate() #deletes the contents of the file
+        json.dump(gu, f, sort_keys=True) # inserts the new dictonary into the file as json data
+        f.close()
+
+        f2 = open('Databases/Users/OU.json', 'r+') #retrieve all OU information from OU.json file
+
+        ous = json.load(f2) #turns the json data into a python dictionary
+        ous.update({args[0]:args[1]}) #adds applicant dictionary username:{information} to OU dictionary
+
+        f2.seek(0)
+        f2.truncate()
+        json.dump(ous, f2, sort_keys=True)
+        f2.close()
+
+        self.reject_an_app(args[0])
 
 class ViewTabooWords(Frame):
     def __init__(self, parent):

@@ -258,7 +258,7 @@ class create_new_document_OU(Frame):
             # now read the file and update its contents:
             f = open("Databases/Documents/Unshared documents.json", "r+")
             d = json.load(f)
-            from Application import Application 
+            from Application import Application
             d.update({new_file_name: [Application.current_logged_in_user, 1, "Private"]}) # doc_name: [doc_owner, version #, doc_mode]
             f.seek(0)
             json.dump(d, f, sort_keys=True)
@@ -422,4 +422,3 @@ class Taboo_Word_Suggestions_OU(Taboo_Word_Suggestions):
         Taboo_Word_Suggestions.__init__(self, parent)
         cancel_button2 = Button(self, text="Go back", command=lambda: parent.show_frame(OrdinaryUserPage))
         cancel_button2.pack(side=BOTTOM)
-        print("1", self, parent)
