@@ -141,12 +141,15 @@ class Your_Documents_OU(Frame):
         self.w2 = OptionMenu(self, self.variable2, *action_options)
         self.w2.pack(side=TOP)
 
+        self.top = Frame(self) # frame in which a third optionmenu may later appear (right below the second optionmenu)
+        self.top.pack(side=TOP)
+
         # initialize info label and action menu
         if doc_options != []:
             self.update_info_label(doc_options[0])
 
-        button2 = Button(self, text='OK', command = self.doc_decision)
-        button2.pack(side=TOP)
+        self.ok_button = Button(self, text='OK', command = self.doc_decision)
+        self.ok_button.pack(side=TOP)
 
         self.mytext = scrolledtext.ScrolledText(self, font=("Times", 10))
         self.mytext.pack(expand=TRUE, fill=Y)
@@ -169,8 +172,8 @@ class Your_Documents_OU(Frame):
         f.close()
 
     def update_info_label(self, event):
-        # The command called when you select a document from the document OptionMenu: updates info label as well as the action OptionMenu,
-        # because depending on whether the selected document is Shared or not, the action OptionMenu differs.
+        # The command called when you select a document from the document OptionMenu: updates info label as well as the action OptionMenu;
+        # depending on whether the selected document is Shared or not, the action OptionMenu differs.
 
         doc_info = self.document_info(event)
         if doc_info != False:
@@ -178,18 +181,21 @@ class Your_Documents_OU(Frame):
 
             if doc_info[2] == 'Shared':
                 self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              'Collaborators: {}\nLock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+                                              ' Collaborators: {}\n Lock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
 
                 action_menu.delete(0, "end")
-                new_actions = ["Read", "Lock", "Edit", "Unlock", "Change mode", "Retrieve previous versions",
-                               "Invite collaborator", "Remove collaborator"]
+                new_actions = ["Read", "Lock", "Edit", "Unlock",
+                               "Change mode to open", "Change mode to private", "Change mode to restricted", "Change mode to shared",
+                               "Retrieve previous versions", "Invite collaborator", "Remove collaborator"]
                 for act in new_actions:
                     action_menu.add_command(label=act, command=lambda value=act: self.variable2.set(value))
             else:
                 self.docinfo_label['text'] = 'Owner: {}\nVersion: {}\nMode: {}'.format(doc_info[0], doc_info[1], doc_info[2])
 
                 action_menu.delete(0, "end")
-                new_actions = ["Read", "Edit", "Change mode", "Retrieve previous versions"]
+                new_actions = ["Read", "Edit",
+                               "Change mode to open", "Change mode to private", "Change mode to restricted", "Change mode to shared",
+                               "Retrieve previous versions"]
                 for act in new_actions:
                     action_menu.add_command(label=act, command=lambda value=act: self.variable2.set(value))
 
@@ -216,15 +222,14 @@ class Your_Documents_OU(Frame):
             if doc_name in shared_docs:
                 doc_info = shared_docs[doc_name]
                 if doc_info[4] == "Unlocked":
-                    doc_info[4] = "Locked by " + Application.current_logged_in_user # update lock_status
-                    shared_docs[doc_name] = doc_info # update shared_docs
+                    shared_docs[doc_name][4] = "Locked by " + Application.current_logged_in_user # update lock_status
 
                     g.seek(0)
                     json.dump(shared_docs, g) # dump shared_docs
 
                     # update info label
                     self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              'Collaborators: {}\nLock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+                                              ' Collaborators: {}\n Lock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
 
                 else:
                     messagebox.showerror("Hmmm", "Already locked.")
@@ -239,44 +244,89 @@ class Your_Documents_OU(Frame):
             if doc_name in shared_docs:
                 doc_info = shared_docs[doc_name]
                 if doc_info[4] != "Unlocked":
-                    doc_info[4] = "Unlocked" # update lock_status
-                    shared_docs[doc_name] = doc_info # update shared_docs
+                    shared_docs[doc_name][4] = "Unlocked" # update lock_status
 
                     with open("Databases/Documents/Shared documents.json", "w") as g:
                         json.dump(shared_docs, g) # dump shared_docs
 
                     # update info label
                     self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              'Collaborators: {}\nLock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+                                              ' Collaborators: {}\n Lock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
 
                 else:
                     messagebox.showerror("Hmmm", "Already unlocked.")
+        elif action_name == "Change mode to open":
+            self.change_mode(doc_name, "Open")
+        elif action_name == "Change mode to private":
+            self.change_mode(doc_name, "Private")
+        elif action_name == "Change mode to restricted":
+            self.change_mode(doc_name, "Restricted")
+        elif action_name == "Change mode to shared":
+            self.change_mode(doc_name, "Shared")
+#        elif action_name == "Change mode to private":
+#            modes = ["Open", "Restricted", "Shared", "Private"]
+#            self.var = StringVar(self)
+#            active_mode = self.document_info(doc_name)[2]
+#            self.var.set(active_mode) # default value
+#            
+#            modes = OptionMenu(self, self.var, *modes)
+#            modes.pack(in_=self.top, side=LEFT)
 
-        elif action_name == "Change mode":
-            g = open("Databases/Documents/Shared documents.json", "r")
-            shared_docs = json.load(g) # {doc_name: [owner name, version, mode, collaborator_list, lock_status]}
-            g.close()
+#            self.ok_button.configure(text = "Change", command=self.save_mode(self.var.get()))
 
-            if doc_name in shared_docs:
-                doc_info = shared_docs[doc_name]
-                if doc_info[4] != "Unlocked":
-                    doc_info[4] = "Unlocked" # update lock_status
-                    shared_docs[doc_name] = doc_info # update shared_docs
 
-                    with open("Databases/Documents/Shared documents.json", "w") as g:
-                        json.dump(shared_docs, g) # dump shared_docs
-
-                    # update info label
-                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              'Collaborators: {}\nLock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
-            
      #   elif action_name == "Retrieve previous versions":
             
      #   elif action_name == "Invite collaborator":
             
-     #   elif action_name == "Remove collaborator":
-            
+#        elif action_name == "Remove collaborator":
 
+    def change_mode(self, doc_name, mode):
+        f1 = open("Databases/Documents/Shared documents.json", "r")
+        f2 = open("Databases/Documents/Unshared documents.json", "r")
+        shared_docs = json.load(f1)
+        unshared_docs = json.load(f2)
+        f1.close(); f2.close()
+
+        if mode == "Open" or mode == "Restricted" or mode == "Private":
+            if doc_name in shared_docs: # in this case, we must move the entry to Unshared documents
+                with open("Databases/Documents/Shared documents.json", "w") as f:
+                    temp = shared_docs[doc_name] # save the entry before deleting
+                    temp[2] = mode # change the entry's mode
+                    del shared_docs[doc_name] # remove entry from dictionary
+
+                    json.dump(shared_docs, f)
+
+                with open("Databases/Documents/Unshared documents.json", "r+") as f:
+                     e = {doc_name: [temp[0], temp[1], temp[2]]}
+                     unshared_docs.update(e)
+
+                     json.dump(unshared_docs, f)
+            elif doc_name in unshared_docs: # no need to move the entry; just update the entry's mode
+                with open("Databases/Documents/Unshared documents.json", "w") as h:
+                    unshared_docs[doc_name][2] = mode
+
+                    json.dump(unshared_docs, h)
+            # finally, update frame:
+            self.update_info_label(doc_name)
+        elif mode == "Shared":
+            # only needs updating (and moving) if it is in unshared_docs
+            if doc_name in unshared_docs:
+                with open("Databases/Documents/Unshared documents.json", "w") as f:
+                    temp = unshared_docs[doc_name] # save the entry before deleting
+                    temp[2] = "Shared"
+                    del unshared_docs[doc_name] # remove entry from dictionary
+
+                    json.dump(unshared_docs, f)
+
+                with open("Databases/Documents/Shared documents.json", "r+") as f:
+                     e = {doc_name: [temp[0], temp[1], temp[2], [], "Unlocked"]}
+                     shared_docs.update(e)
+
+                     json.dump(shared_docs, f)
+
+                # finally, update frame:
+                self.update_info_label(doc_name)
 
 class Recent_Documents_OU(Frame):
      def __init__(self, parent):
@@ -385,7 +435,9 @@ class create_new_document_OU(Frame):
         new_file_name = self.cnd_entry.get()
         file_names = os.listdir("Document")
 
-        if (new_file_name + ".txt") not in file_names:
+        if new_file_name == '':
+            messagebox.showerror("Error", "File name can't be empty")
+        elif (new_file_name + ".txt") not in file_names:
             open("Document/" + new_file_name + ".txt", "w") # save document.txt
 
             # We also have to save the information of the newly created (private) document in 'Unshared documents.json':
