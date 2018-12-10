@@ -31,52 +31,54 @@ class OrdinaryUserPage(Frame):
 
         fra = Frame(self)
 
-        Labe0 = Label(self, text='What would you like to do?', font="Times 16 bold")
-        Labe0.pack(padx=15, pady=5)
+        q_label = Label(self, text='What would you like to do?', font="Times 16 bold")
+        q_label.pack(padx=15, pady=5)
 
         # Providing buttons for various OU options:
 
-        but_0 = Button(fra, text='Your Documents', command=lambda: parent.show_frame(Your_Documents_OU))
-        but_0.pack(side=TOP, padx=4, pady=5)
+        own_docs_button = Button(fra, text='Your documents', command=lambda: parent.show_frame(Your_Documents_OU))
+        own_docs_button.pack(side=TOP, padx=4, pady=5)
 
-        # but0 = Button(fra, text='Create new document', command=lambda: parent.show_frame(create_new_document))
-        but0 = Button(fra, text='Create new document', command=lambda: parent.show_frame(create_new_document_OU))
-        but0.pack(side=TOP, padx=5, pady=5)
+        collab_docs_button = Button(fra, text='Documents you\'re collaborating on', command=lambda: parent.show_frame(Collab_Documents_OU))
+        collab_docs_button.pack(side=TOP, padx=4, pady=5)
 
-        but1 = Button(fra, text='Invite OUs', command=lambda: parent.show_frame(invite_ou_window))
+        create_doc_button = Button(fra, text='Create new document', command=lambda: parent.show_frame(create_new_document_OU))
+        create_doc_button.pack(side=TOP, padx=5, pady=5)
+
+        but1 = Button(fra, text='Invite OUs', command=lambda: parent.show_frame(invite_ou_window)) # should be removed later
         but1.pack(side=TOP, padx=6, pady=5)
 
-        but2 = Button(fra, text='View Invitations', command=lambda: parent.show_frame(accept_decline_invites))
-        but2.pack(side=TOP, padx=7, pady=5)
+        view_invites_button = Button(fra, text='View invitations', command=lambda: parent.show_frame(accept_decline_invites))
+        view_invites_button.pack(side=TOP, padx=7, pady=5)
 
-        but3 = Button(fra, text='Search other Users', command=lambda: parent.show_frame(get_info_ou))
-        but3.pack(side=TOP, padx=8, pady=5)
+        search_users_button = Button(fra, text='Search for other users', command=lambda: parent.show_frame(get_info_ou))
+        search_users_button.pack(side=TOP, padx=8, pady=5)
 
-        but4 = Button(fra, text='Process Complaints of OUs')
-        but4.pack(side=TOP, padx=9, pady=5)
+        proc_button = Button(fra, text='Process complaints about OUs')
+        proc_button.pack(side=TOP, padx=9, pady=5)
 
-        but5 = Button(fra, text='File Complaints', command=lambda: parent.show_frame(File_Complaints))
-        but5.pack(side=TOP, padx=10, pady=5)
+        complain_button = Button(fra, text='File complaints', command=lambda: parent.show_frame(File_Complaints))
+        complain_button.pack(side=TOP, padx=10, pady=5)
 
         # from Pages.GuestUserPage import Taboo_Word_Suggestions
-        but6 = Button(fra, text='Suggest Taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions_OU))
-        but6.pack(side=TOP, padx=9, pady=5)
+        suggest_taboo_button = Button(fra, text='Suggest taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions_OU))
+        suggest_taboo_button.pack(side=TOP, padx=9, pady=5)
 
-        Labe1 = Label(fra, text='Recent Documents: ', font="Times 25 bold")
-        Labe1.pack(side=TOP, padx=11, pady=5)
+        recent_docs_label = Label(fra, text='Recent documents: ', font="Times 25 bold")
+        recent_docs_label.pack(side=TOP, padx=11, pady=5)
 
-        button8 = Button(fra, text='Document 1', command=lambda: parent.show_frame(Recent_Documents_OU))
-        button8.pack(side=LEFT, padx=14, pady=5)
+        doc1_button = Button(fra, text='Document 1', command=lambda: parent.show_frame(Recent_Documents_OU))
+        doc1_button.pack(side=LEFT, padx=14, pady=5)
 
-        button9 = Button(fra, text='Document 2', command=lambda: parent.show_frame(Recent_Documents_OU))
-        button9.pack(side=LEFT, padx=13, pady=5)
+        doc2_button = Button(fra, text='Document 2', command=lambda: parent.show_frame(Recent_Documents_OU))
+        doc2_button.pack(side=LEFT, padx=13, pady=5)
 
-        button9 = Button(fra, text='Document 3', command=lambda: parent.show_frame(Recent_Documents_OU))
-        button9.pack(side=LEFT, padx=12, pady=5)
+        doc3_button = Button(fra, text='Document 3', command=lambda: parent.show_frame(Recent_Documents_OU))
+        doc3_button.pack(side=LEFT, padx=12, pady=5)
 
-        button10 = Button(self, text='Add Profile Picture')
-        button10.pack(anchor='nw', padx=5, pady=0)
-        button10.config(height='6', width='6')
+        pic_button = Button(self, text='Add Profile Picture')
+        pic_button.pack(anchor='nw', padx=5, pady=0)
+        pic_button.config(height='6', width='6')
 
         fra.pack(padx=100, pady=19)
 
@@ -134,7 +136,7 @@ class Your_Documents_OU(Frame):
 
         action_label = Label(self, text="What would you like to do?")
         action_label.pack(side=TOP, padx=5, pady=5)
-        action_options = ["Read", "Lock", "Edit", "Unlock", "Change mode", "Retrieve previous versions", "View collaborators"]
+        action_options = ["Read", "Lock", "Edit", "Unlock", "Change mode", "Retrieve previous versions"]
 
         self.variable2 = StringVar(self)
         self.variable2.set(action_options[0])
@@ -144,7 +146,7 @@ class Your_Documents_OU(Frame):
         self.top = Frame(self) # frame in which a third optionmenu may later appear (right below the second optionmenu)
         self.top.pack(side=TOP)
 
-        # initialize info label and action menu
+        # update info label and action menu
         if doc_options != []:
             self.update_info_label(doc_options[0])
 
@@ -180,8 +182,16 @@ class Your_Documents_OU(Frame):
             action_menu = self.w2["menu"]
 
             if doc_info[2] == 'Shared':
-                self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              ' Collaborators: {}\n Lock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+                if len(doc_info[3]) <= 4:
+                    formatted_collaborator_list = '  ' + ', '.join(doc_info[3])
+                else:
+                    remainder = len(doc_info[3]) % 4
+                    formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
+                                                                                                 doc_info[3][2::4], doc_info[3][3::4]) ]) +\
+                                                  ',\n  ' + ', '.join(doc_info[3][-remainder:])
+
+                self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
+                                             ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
 
                 action_menu.delete(0, "end")
                 new_actions = ["Read", "Lock", "Edit", "Unlock",
@@ -228,8 +238,15 @@ class Your_Documents_OU(Frame):
                     json.dump(shared_docs, g) # dump shared_docs
 
                     # update info label
-                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              ' Collaborators: {}\n Lock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+                    if len(doc_info[3]) <= 4:
+                        formatted_collaborator_list = '  ' + ', '.join(doc_info[3])
+                    else:
+                        remainder = len(doc_info[3]) % 4
+                        formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
+                                                                                                     doc_info[3][2::4], doc_info[3][3::4]) ]) +\
+                                                      ',\n  ' + ', '.join(doc_info[3][-remainder:])
+                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
+                                                 ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
 
                 else:
                     messagebox.showerror("Hmmm", "Already locked.")
@@ -249,9 +266,16 @@ class Your_Documents_OU(Frame):
                     with open("Databases/Documents/Shared documents.json", "w") as g:
                         json.dump(shared_docs, g) # dump shared_docs
 
-                    # update info label
-                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n' + \
-                                              ' Collaborators: {}\n Lock status: {}').format(doc_info[0], doc_info[1], doc_info[3], doc_info[4])
+                    # update info label:
+                    if len(doc_info[3]) <= 4:
+                        formatted_collaborator_list = '  ' + ', '.join(doc_info[3])
+                    else:
+                        remainder = len(doc_info[3]) % 4
+                        formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
+                                                                                                     doc_info[3][2::4], doc_info[3][3::4]) ]) +\
+                                                      ',\n  ' + ', '.join(doc_info[3][-remainder:])
+                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
+                                                 ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
 
                 else:
                     messagebox.showerror("Hmmm", "Already unlocked.")
@@ -328,27 +352,186 @@ class Your_Documents_OU(Frame):
                 # finally, update frame:
                 self.update_info_label(doc_name)
 
+class Collab_Documents_OU(Frame):
+    def __init__(self, parent):
+        Frame.__init__(self, parent, bg='orange')
+        Frame.pack(self, side="top", fill="both", expand=True)
+        Frame.grid_rowconfigure(self, 0, weight=1)
+        Frame.grid_columnconfigure(self, 0, weight=1)
+
+        self.parent = parent
+        
+        back_button = Button(self, text="Back to OU Home Page", command=lambda: parent.show_frame(OrdinaryUserPage))
+        back_button.pack(side=BOTTOM)
+        docs_label = Label(self, text= "Choose Document")
+        docs_label.pack(side=TOP)
+
+        doc_options = []
+        with open("Databases/Documents/Shared documents.json", "r") as f:
+            shared_docs = json.load(f)
+
+        # doc_options will contain the names of only those shared documents whose collaborators include Application.current_logged_in_user
+        for key, value in shared_docs.items():
+            if Application.current_logged_in_user in value[3]:
+                doc_options.append(key)
+
+        # Remember that entries in Shared docs have format {Doc_name: [Owner, Version, Mode, Collaborators_list, Lock_status]}.
+        # Lock_status is either 'Unlocked' or 'Locked by <user>' where <user> is the user who has currently locked it.
+
+        self.docinfo_label = Label(self, text="Owner:\nVersion:\nMode:\n Collaborators:\n Lock status:", justify=LEFT, font = ("Courier", 11))
+
+        self.variable = StringVar(self)
+        if doc_options != []:
+            self.variable.set(doc_options[0])
+            self.w1 = OptionMenu(self, self.variable, *doc_options, command=self.update_info_label)
+            self.w1.pack(side=TOP)
+        else:
+            self.variable.set('')
+            self.w1 = OptionMenu(self, self.variable, '', command=self.update_info_label)
+            self.w1.pack(side=TOP)
+
+        self.docinfo_label.pack(pady=9, side=TOP)
+
+        action_label = Label(self, text="What would you like to do?")
+        action_label.pack(side=TOP, padx=5, pady=5)
+        action_options = ["Read", "Lock", "Edit", "Unlock", "Retrieve previous versions"]
+
+        self.variable2 = StringVar(self)
+        self.variable2.set(action_options[0])
+        self.w2 = OptionMenu(self, self.variable2, *action_options)
+        self.w2.pack(side=TOP)
+
+        self.top = Frame(self) # frame in which a third optionmenu may later appear (right below the second optionmenu)
+        self.top.pack(side=TOP)
+
+        # update info label with first document's information
+        if doc_options != []:
+            self.update_info_label(doc_options[0])
+
+        self.ok_button = Button(self, text='OK', command = self.doc_decision)
+        self.ok_button.pack(side=TOP)
+
+        self.mytext = scrolledtext.ScrolledText(self, font=("Times", 10))
+        self.mytext.pack(expand=TRUE, fill=Y)
+        self.mytext.configure(state="disabled") # initially, the text box is disabled
+
+    def document_info(self, document_name):
+        # returns document info or False if the info is not found
+        with open("Databases/Documents/Shared documents.json", "r") as f:
+            shared_docs = json.load(f)
+
+            if document_name in shared_docs: 
+                return shared_docs[document_name]
+            else: # document could not be found
+                return False
+
+    def update_info_label(self, event):
+        # The command called when you select a document from the document OptionMenu: it updates the info label
+        doc_info = self.document_info(event)
+        if doc_info != False:
+            if len(doc_info[3]) <= 4:
+                formatted_collaborator_list = '  ' + ', '.join(doc_info[3])
+            else:
+                remainder = len(doc_info[3]) % 4
+                formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
+                                                                                             doc_info[3][2::4], doc_info[3][3::4]) ]) +\
+                                              ',\n  ' + ', '.join(doc_info[3][-remainder:])
+            self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
+                                         ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
+
+    def doc_decision(self):
+        # the command when you click 'OK': performs the selected action on the selected document
+        doc_name = self.variable.get()
+        action_name = self.variable2.get()
+
+        if doc_name == '':
+            # if there are no documents, the selected document is empty, so just return
+            return
+
+        if action_name == "Read":
+            f = open("Document/" + doc_name + ".txt", "r")
+            contents = f.read()
+            self.mytext.configure(state="normal") # reenable text box to update its contents
+            self.mytext.delete(1.0,END) # delete old contents
+            self.mytext.insert(INSERT, contents) # insert new contents
+            self.mytext.configure(state="disabled") # disable text box again
+            f.close()
+        elif action_name == "Lock":
+            f = open("Databases/Documents/Shared documents.json", "r+")
+            shared_docs = json.load(f) # {doc_name: [owner name, version, mode, collaborator_list, lock_status]}
+            if doc_name in shared_docs:
+                doc_info = shared_docs[doc_name]
+                if doc_info[4] == "Unlocked":
+                    shared_docs[doc_name][4] = "Locked by " + Application.current_logged_in_user
+
+                    f.seek(0)
+                    json.dump(shared_docs, f)
+
+                    if len(doc_info[3]) <= 4:
+                        formatted_collaborator_list = '  ' + ', '.join(doc_info[3])
+                    else:
+                        remainder = len(doc_info[3]) % 4
+                        formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
+                                                                                                     doc_info[3][2::4], doc_info[3][3::4]) ]) +\
+                                                      ',\n  ' + ', '.join(doc_info[3][-remainder:])
+                                                      
+                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
+                                                 ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
+                else:
+                    messagebox.showerror("Hmmm", "Already locked.")
+            f.close()
+     #   elif action_name == "Edit":
+            # move to a new frame
+        elif action_name == "Unlock":
+            with open("Databases/Documents/Shared documents.json", "r") as f:
+                shared_docs = json.load(f) # {doc_name: [owner name, version, mode, collaborator_list, lock_status]}
+
+            if doc_name in shared_docs:
+                doc_info = shared_docs[doc_name]
+                if doc_info[4] == "Unlocked":
+                    messagebox.showerror("Hmmm", "Already unlocked.")
+                elif doc_info[4] == "Locked by " + Application.current_logged_in_user: # can only unlock a doc he/she has locked
+                    shared_docs[doc_name][4] = "Unlocked"
+
+                    with open("Databases/Documents/Shared documents.json", "w") as f:
+                        json.dump(shared_docs, f)
+
+                    if len(doc_info[3]) <= 4:
+                        formatted_collaborator_list = '  ' + ', '.join(doc_info[3])
+                    else:
+                        remainder = len(doc_info[3]) % 4
+                        formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
+                                                                                                     doc_info[3][2::4], doc_info[3][3::4]) ]) +\
+                                                      ',\n  ' + ', '.join(doc_info[3][-remainder:])
+                    self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
+                                                 ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
+
+                else:
+                    messagebox.showerror("Hmmm", "Someone else is updating this document.")
+
+     #   elif action_name == "Retrieve previous versions":
+
 class Recent_Documents_OU(Frame):
-     def __init__(self, parent):
-         Frame.__init__(self, parent, bg='yellow')
-         Frame.pack(self, side="top", fill="both", expand=True)
-         Frame.grid_rowconfigure(self, 0, weight=1)
-         Frame.grid_columnconfigure(self, 0, weight=1)
+    def __init__(self, parent):
+        Frame.__init__(self, parent, bg='yellow')
+        Frame.pack(self, side="top", fill="both", expand=True)
+        Frame.grid_rowconfigure(self, 0, weight=1)
+        Frame.grid_columnconfigure(self, 0, weight=1)
 
-         self.parent = parent
+        self.parent = parent
 
-         rd_label0 = Label(self, text="What would you like to do?")
-         rd_label0.pack(side=TOP)
-         rd_options = ["Read", "Edit", "Retrieve older versions", "Change privacy setting", "Lock document", "Unlock document", "Remove collaborator"]
-         variable = StringVar(self)
-         variable.set(rd_options[0])
-         w = OptionMenu(self, variable, *rd_options)
-         w.pack(side=TOP)
+        rd_label0 = Label(self, text="What would you like to do?")
+        rd_label0.pack(side=TOP)
+        rd_options = ["Read", "Edit", "Retrieve older versions", "Change privacy setting", "Lock document", "Unlock document", "Remove collaborator"]
+        variable = StringVar(self)
+        variable.set(rd_options[0])
+        w = OptionMenu(self, variable, *rd_options)
+        w.pack(side=TOP)
 
-         button0 = Button(self, text='submit')
-         button0.pack(side=TOP)
-         button1 = Button(self, text='back', command=lambda: parent.show_frame(OrdinaryUserPage))
-         button1.pack(side=TOP)
+        button0 = Button(self, text='submit')
+        button0.pack(side=TOP)
+        button1 = Button(self, text='back', command=lambda: parent.show_frame(OrdinaryUserPage))
+        button1.pack(side=TOP)
 
 class File_Complaints(Frame):
     def __init__(self, parent):
