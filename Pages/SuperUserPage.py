@@ -226,7 +226,10 @@ class ViewTabooWords(Frame):
         for item in vtw_list:
             self.vtw_lb.insert(END, item)
 
-        vtw_add_button = Button(self, text='Add')
+        self.vtw_add_entry = Entry(self)
+        self.vtw_add_entry.pack(side = TOP)
+
+        vtw_add_button = Button(self, text='Add', command= self.add_taboo_word)
         vtw_add_button.pack(side=TOP)
 
         vtw_remove_button = Button(self, text='Remove', command= self.remove_taboo_word)
@@ -251,7 +254,23 @@ class ViewTabooWords(Frame):
             messagebox.showerror('Error', 'This file does not exist!')
 
     def add_taboo_word(self):
-        pass
+        added_taboo_word = self.vtw_add_entry.get()
+        if( len(added_taboo_word) < 1 ):
+            messagebox.showerror('Error', 'Please enter a word!')
+        try:
+            f = open('Databases/TabooWords/TabooWords.json', 'r+')
+            taboo_words = json.load(f)
+            if added_taboo_word in taboo_words:
+                messagebox.showwarning("Warning", added_taboo_word + " already exists in the taboo words list!")
+            else:
+                taboo_words.append(added_taboo_word)
+                f.seek(0)
+                f.truncate()
+                json.dump(taboo_words, f)
+                f.close()
+            self.parent.show_frame(ViewTabooWords)
+        except:
+            messagebox.showerror('Error', 'An error occurred!')
 
     def remove_taboo_word(self):
         try:
@@ -282,6 +301,13 @@ class ViewSuggestedTabooWords(Frame):
 
         vstw_label = Label(self, text= "Taboo Words")
         vstw_label.pack(side=TOP)
+
+        # frame = Frame(master)
+        # scrollbar = Scrollbar(frame, orient=VERTICAL)
+        # listbox = Listbox(frame, yscrollcommand=scrollbar.set)
+        # scrollbar.config(command=listbox.yview)
+        # scrollbar.pack(side=RIGHT, fill=Y)
+        # listbox.pack(side=LEFT, fill=BOTH, expand=1)
 
         vstw_list = self.retrieve_taboo_word_suggestions()
         self.vstw_lb = Listbox(self)
@@ -315,13 +341,16 @@ class ViewSuggestedTabooWords(Frame):
             f = open('Databases/TabooWords/TabooWords.json', 'r+')
             taboo_words = json.load(f)
             new_taboo_word = self.vstw_lb.get(self.vstw_lb.curselection())
-            taboo_words.append(new_taboo_word)
-            f.seek(0)
-            f.truncate()
-            json.dump(taboo_words, f, sort_keys=True)
-            f.close()
+            if new_taboo_word in taboo_words:
+                messagebox.showwarning("Warning", new_taboo_word + " already exists in the taboo words list!")
+            else:
+                taboo_words.append(new_taboo_word)
+                f.seek(0)
+                f.truncate()
+                json.dump(taboo_words, f, sort_keys=True)
+                f.close()
+                messagebox.showinfo('Success', new_taboo_word + 'was added to the taboo words list!')
             self.remove_stw_from_db(new_taboo_word)
-            messagebox.showinfo('Success', new_taboo_word + 'was added to the taboo words list!')
             self.parent.show_frame(ViewSuggestedTabooWords)
         except TclError:
             messagebox.showerror('Error', 'Please select a word!')
