@@ -2,6 +2,7 @@
 
 
   We want to develop a document sharing system such that group members can collaborate on the same documents without causing inconsistencies. There are three types of users in this system: Super User (SU), Ordinary User (OU) and Guest (GU). 
+  
 SU:
 
 - [ ]	update membership
@@ -9,7 +10,10 @@ SU:
 - [ ]	unlock any locked document
 - [ ]	process complaints about OU's
 - [ ]	have all privileges reserved for OUs inside any group
+
+
 OU:
+
 - [ ] create new document(s), the creator of a document is the owner of the document and can invite other OUs to update it,   
       and decide if the document is open to the public (can be seen by everyone), restricted (can only be viewed as read-only 
       by GU's and edited by OU's), shared (viewed/edited by OU's who are invited) and private
@@ -27,6 +31,7 @@ OU:
 - [ ] have all privileges for GUs
 
 GU:
+
 - [ ] read open document(s), retrieve old version(s) of open document(s) and complains about those documents.
 - [ ] send suggestions to SU about taboo words
 - [ ] apply to be an OU that is to be confirmed or rejected by SU, in the application his/her name, technical interests should 
