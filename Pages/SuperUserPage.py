@@ -220,22 +220,22 @@ class ViewTabooWords(Frame):
         vtw_label.pack(side=TOP)
 
         vtw_list = self.retrieve_taboo_words()
-        vtw_lb = Listbox(self)
-        vtw_lb.pack(side=TOP)
+        self.vtw_lb = Listbox(self)
+        self.vtw_lb.pack(side=TOP)
 
         for item in vtw_list:
-            vtw_lb.insert(END, item)
+            self.vtw_lb.insert(END, item)
 
         vtw_add_button = Button(self, text='Add')
         vtw_add_button.pack(side=TOP)
 
-        vtw_remove_button = Button(self, text='Remove')
+        vtw_remove_button = Button(self, text='Remove', command= self.remove_taboo_word)
         vtw_remove_button.pack(side=TOP)
 
         vtw_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
         vtw_cancel_button.pack(side=TOP)
 
-        vtw_vst_button = Button(self, text='View Suggested Taboo Words', command=lambda: parent.show_frame(ViewSuggestedTabooWords)) #change later
+        vtw_vst_button = Button(self, text='View Suggested Taboo Words', command=lambda: parent.show_frame(ViewSuggestedTabooWords))
         vtw_vst_button.pack(side=TOP)
 
     def retrieve_taboo_words(self):
@@ -250,6 +250,27 @@ class ViewTabooWords(Frame):
             f.close()
             messagebox.showerror('Error', 'This file does not exist!')
 
+    def add_taboo_word(self):
+        pass
+
+    def remove_taboo_word(self):
+        try:
+            removed_taboo_word = self.vtw_lb.get(self.vtw_lb.curselection())
+            if (messagebox.askyesno('Confirm Removal', 'Are you sure you want to remove the word ' + removed_taboo_word + '?')):
+                self.remove_tw_from_db(removed_taboo_word)
+                self.parent.show_frame(ViewTabooWords)
+        except TclError:
+            messagebox.showerror('Error', 'Please select a word!')
+
+    def remove_tw_from_db(self, removed_tw):
+        f = open('Databases/TabooWords/TabooWords.json', 'r+')
+        taboo_words = json.load(f)
+        taboo_words.remove(removed_tw)
+        f.seek(0)
+        f.truncate()
+        json.dump(taboo_words, f)
+        f.close()
+
 class ViewSuggestedTabooWords(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent, bg='yellow')
@@ -259,38 +280,69 @@ class ViewSuggestedTabooWords(Frame):
 
         self.parent = parent
 
-        vtw_label = Label(self, text= "Taboo Words")
-        vtw_label.pack(side=TOP)
+        vstw_label = Label(self, text= "Taboo Words")
+        vstw_label.pack(side=TOP)
 
-        vtw_list = self.retrieve_taboo_word_suggestions()
-        self.vtw_lb = Listbox(self)
-        self.vtw_lb.pack(side=TOP)
-        for item in vtw_list:
-            self.vtw_lb.insert(END, item)
+        vstw_list = self.retrieve_taboo_word_suggestions()
+        self.vstw_lb = Listbox(self)
+        self.vstw_lb.pack(side=TOP)
+        for item in vstw_list:
+            self.vstw_lb.insert(END, item)
 
-        vtw_add_button = Button(self, text='Add to Taboo Words list', command = self.add_taboo_word)
-        vtw_add_button.pack(side=TOP)
+        vstw_add_button = Button(self, text='Add to Taboo Words list', command = self.add_taboo_word_to_tbl)
+        vstw_add_button.pack(side=TOP)
 
-        vtw_remove_button = Button(self, text='Remove')
-        vtw_remove_button.pack(side=TOP)
+        vstw_remove_button = Button(self, text='Remove', command = self.remove_suggested_taboo_word)
+        vstw_remove_button.pack(side=TOP)
 
-        vtw_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(ViewTabooWords))
-        vtw_cancel_button.pack(side=TOP)
+        vstw_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(ViewTabooWords))
+        vstw_cancel_button.pack(side=TOP)
 
     def retrieve_taboo_word_suggestions(self):
-        f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'r+')
-        tws_dict = json.load(f)
-        f.close()
-        return list(tws_dict.keys())
-
-    def add_taboo_word(self):
         try:
-            print( self.vtw_lb.get(self.vtw_lb.curselection()) )
+            f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'r+')
+            tws_dict = json.load(f)
+            f.close()
+            return list(tws_dict.keys())
+        except FileNotFoundError:
+            f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'w')
+            json.dump({}, f)
+            f.close()
+            messagebox.showerror('Error', 'This file does not exist!')
+
+    def add_taboo_word_to_tbl(self):
+        try:
+            f = open('Databases/TabooWords/TabooWords.json', 'r+')
+            taboo_words = json.load(f)
+            new_taboo_word = self.vstw_lb.get(self.vstw_lb.curselection())
+            taboo_words.append(new_taboo_word)
+            f.seek(0)
+            f.truncate()
+            json.dump(taboo_words, f, sort_keys=True)
+            f.close()
+            self.remove_stw_from_db(new_taboo_word)
+            messagebox.showinfo('Success', new_taboo_word + 'was added to the taboo words list!')
+            self.parent.show_frame(ViewSuggestedTabooWords)
         except TclError:
             messagebox.showerror('Error', 'Please select a word!')
 
     def remove_suggested_taboo_word(self):
-        pass
+        try:
+            removed_taboo_word = self.vstw_lb.get(self.vstw_lb.curselection())
+            if (messagebox.askyesno('Confirm Removal', 'Are you sure you want to remove the word ' + removed_taboo_word + '?')):
+                self.remove_stw_from_db(removed_taboo_word)
+                self.parent.show_frame(ViewSuggestedTabooWords)
+        except TclError:
+            messagebox.showerror('Error', 'Please select a word!')
+
+    def remove_stw_from_db(self, removed_tw):
+        f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'r+')
+        suggested_taboo_words = json.load(f)
+        suggested_taboo_words.pop(removed_tw)
+        f.seek(0)
+        f.truncate()
+        json.dump(suggested_taboo_words, f)
+        f.close()
 
 class RemoveOU(Frame):
     def __init__(self, parent):
