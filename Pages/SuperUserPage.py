@@ -31,7 +31,7 @@ class SuperUserPage(Frame):
         button2 = Button(fr, text='View Complaints', command=lambda: parent.show_frame(ViewComplaints))
         button2.pack(side=TOP, padx=7, pady=5)
 
-        button3 = Button(fr, text='View Taboo Words', command=lambda: parent.show_frame(ViewTabooWords))
+        button3 = Button(fr, text='View Taboo Words/Taboo Word Suggestions', command=lambda: parent.show_frame(ViewTabooWords))
         button3.pack(side=TOP, padx=8, pady=5)
 
         button4 = Button(fr, text='Remove OU\'s', command=lambda: parent.show_frame(RemoveOU))
@@ -87,29 +87,6 @@ class ViewComplaints(Frame):
         vc_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
         vc_cancel_button.pack(side=TOP)
 
-class ViewSuggestedTaboos(Frame):
-    def __init__(self, parent):
-        Frame.__init__(self, parent, bg='yellow')
-        Frame.pack(self, side="top", fill="both", expand=True)
-        Frame.grid_rowconfigure(self, 0, weight=1)
-        Frame.grid_columnconfigure(self, 0, weight=1)
-
-        self.parent = parent
-
-        vtw_label = Label(self, text= "Taboo Words")
-        vtw_label.pack(side=TOP)
-        vtw_list = ["Fork", "Beach", "Damn"]
-        vtw_lb = Listbox(self)
-        vtw_lb.pack(side=TOP)
-        for item in vtw_list:
-            vtw_lb.insert(END, item)
-        vtw_add_button = Button(self, text='Add')
-        vtw_add_button.pack(side=TOP)
-        vtw_remove_button = Button(self, text='Remove')
-        vtw_remove_button.pack(side=TOP)
-        vtw_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
-        vtw_cancel_button.pack(side=TOP)
-
 class ViewApplications(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent, bg='yellow')
@@ -158,10 +135,20 @@ class ViewAnApplication(Frame):
         Frame.grid_rowconfigure(self, 0, weight=1)
         Frame.grid_columnconfigure(self, 0, weight=1)
 
+        self.parent = parent
+
         v_an_app = Text(self)
-        v_an_app.insert(INSERT, args[0])
+        v_an_app.insert(INSERT,"Username: " + args[0])
         v_an_app.insert(END, '\n')
-        v_an_app.insert(INSERT, args[1])
+
+        for key in args[1]:
+            if(type(args[1][key]) is list):
+                v_an_app.insert(INSERT, key + ": " + ", ".join(args[1][key]))
+                v_an_app.insert(END, '\n')
+            else:
+                v_an_app.insert(INSERT, key + ": " + args[1][key])
+                v_an_app.insert(END, '\n')
+
         v_an_app.config(state=DISABLED)
         v_an_app.pack(side=TOP)
 
@@ -175,6 +162,11 @@ class ViewAnApplication(Frame):
         v_an_app_cancel_button.pack(side=TOP)
 
     def reject_an_app(self, *args):
+
+        if (messagebox.askyesno('Confirm Rejection', 'Are you sure you want to reject this application?')):
+            self.remove_an_app(args[0])
+
+    def remove_an_app(self, *args):
         try:
             f = open('Databases/Applications/Applications.json', 'r+')
             apps = json.load(f)
@@ -183,33 +175,37 @@ class ViewAnApplication(Frame):
             f.truncate()
             json.dump(apps, f, sort_keys=True)
             f.close()
+            self.parent.show_frame(ViewApplications)
         except:
             messagebox.showerror('Error', 'Something went wrong!')
 
     def accept_an_app(self, *args):
-        f = open('Databases/Users/GU.json', 'r+') #retrieve all username:passwords from GU.json file
+        try:
+            if (messagebox.askyesno('Confirm Acceptance', 'Are you sure you want to accept this application?')):
+                f = open('Databases/Users/GU.json', 'r+') #retrieve all username:passwords from GU.json file
 
-        gu = json.load(f) # turns the json data into a python dictionary
-        gu_pass = gu[args[0]] # retrieves the applicants password
-        args[1]["password"] = gu_pass #insert the applicants password to dictionarys
+                gu = json.load(f) # turns the json data into a python dictionary
+                gu_pass = gu[args[0]] # retrieves the applicants password
+                args[1]["password"] = gu_pass #insert the applicants password to dictionarys
 
-        gu.pop(args[0]) # removes the GU's username:password from the gu dictionary
-        f.seek(0)
-        f.truncate() #deletes the contents of the file
-        json.dump(gu, f, sort_keys=True) # inserts the new dictonary into the file as json data
-        f.close()
+                gu.pop(args[0]) # removes the GU's username:password from the gu dictionary
+                f.seek(0)
+                f.truncate() #deletes the contents of the file
+                json.dump(gu, f, sort_keys=True) # inserts the new dictonary into the file as json data
+                f.close()
 
-        f2 = open('Databases/Users/OU.json', 'r+') #retrieve all OU information from OU.json file
+                f2 = open('Databases/Users/OU.json', 'r+') #retrieve all OU information from OU.json file
 
-        ous = json.load(f2) #turns the json data into a python dictionary
-        ous.update({args[0]:args[1]}) #adds applicant dictionary username:{information} to OU dictionary
+                ous = json.load(f2) #turns the json data into a python dictionary
+                ous.update({args[0]:args[1]}) #adds applicant dictionary username:{information} to OU dictionary
 
-        f2.seek(0)
-        f2.truncate()
-        json.dump(ous, f2, sort_keys=True)
-        f2.close()
-
-        self.reject_an_app(args[0])
+                f2.seek(0)
+                f2.truncate()
+                json.dump(ous, f2, sort_keys=True)
+                f2.close()
+                self.remove_an_app(args[0])
+        except:
+            messagebox.showerror('Error', 'Something went wrong!')
 
 class ViewTabooWords(Frame):
     def __init__(self, parent):
@@ -222,17 +218,79 @@ class ViewTabooWords(Frame):
 
         vtw_label = Label(self, text= "Taboo Words")
         vtw_label.pack(side=TOP)
-        vtw_list = ["Fork", "Beach", "Damn"]
+
+        vtw_list = self.retrieve_taboo_words()
         vtw_lb = Listbox(self)
         vtw_lb.pack(side=TOP)
+
         for item in vtw_list:
             vtw_lb.insert(END, item)
+
         vtw_add_button = Button(self, text='Add')
         vtw_add_button.pack(side=TOP)
+
         vtw_remove_button = Button(self, text='Remove')
         vtw_remove_button.pack(side=TOP)
+
         vtw_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
         vtw_cancel_button.pack(side=TOP)
+
+        vtw_vst_button = Button(self, text='View Suggested Taboo Words', command=lambda: parent.show_frame(ViewSuggestedTabooWords)) #change later
+        vtw_vst_button.pack(side=TOP)
+
+    def retrieve_taboo_words(self):
+        try:
+            f = open('Databases/TabooWords/TabooWords.json', 'r+')
+            taboo_words = json.load(f)
+            f.close()
+            return taboo_words
+        except FileNotFoundError:
+            f = open('Databases/TabooWords/TabooWords.json', 'w')
+            json.dump([], f)
+            f.close()
+            messagebox.showerror('Error', 'This file does not exist!')
+
+class ViewSuggestedTabooWords(Frame):
+    def __init__(self, parent):
+        Frame.__init__(self, parent, bg='yellow')
+        Frame.pack(self, side="top", fill="both", expand=True)
+        Frame.grid_rowconfigure(self, 0, weight=1)
+        Frame.grid_columnconfigure(self, 0, weight=1)
+
+        self.parent = parent
+
+        vtw_label = Label(self, text= "Taboo Words")
+        vtw_label.pack(side=TOP)
+
+        vtw_list = self.retrieve_taboo_word_suggestions()
+        self.vtw_lb = Listbox(self)
+        self.vtw_lb.pack(side=TOP)
+        for item in vtw_list:
+            self.vtw_lb.insert(END, item)
+
+        vtw_add_button = Button(self, text='Add to Taboo Words list', command = self.add_taboo_word)
+        vtw_add_button.pack(side=TOP)
+
+        vtw_remove_button = Button(self, text='Remove')
+        vtw_remove_button.pack(side=TOP)
+
+        vtw_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(ViewTabooWords))
+        vtw_cancel_button.pack(side=TOP)
+
+    def retrieve_taboo_word_suggestions(self):
+        f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'r+')
+        tws_dict = json.load(f)
+        f.close()
+        return list(tws_dict.keys())
+
+    def add_taboo_word(self):
+        try:
+            print( self.vtw_lb.get(self.vtw_lb.curselection()) )
+        except TclError:
+            messagebox.showerror('Error', 'Please select a word!')
+
+    def remove_suggested_taboo_word(self):
+        pass
 
 class RemoveOU(Frame):
     def __init__(self, parent):
