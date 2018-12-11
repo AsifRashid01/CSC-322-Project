@@ -4,7 +4,7 @@
   We want to develop a document sharing system such that group members can collaborate on the same documents without causing inconsistencies. There are three types of users in this system: Super User (SU), Ordinary User (OU) and Guest (GU). 
 SU:
 
-- [x ]	update membership
+- [ ]	update membership
 - [ ]	maintain a list of taboo words
 - [ ]	unlock any locked document
 - [ ]	process complaints about OU's
