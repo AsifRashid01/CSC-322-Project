@@ -38,10 +38,17 @@ GU:
       be submitted.
 
 constraints:
+
 •	there is only ONE current version for any document
+
 •	for simplicity there is only one word for each line in all documents 
+
 •	only the editing command(s) are saved for older versions with three possible actions: add, delete and update. For instance, if the file doc_1.txt contains one line "the", and doc_2.txt contains three lines "welcome \n the \n world\n", then your system only saves doc_2.txt, doc_1.history saves the commands "delete 1; delete 3" which changes doc_2.txt into doc_1.txt. Your system generates the history command file based on the difference.
+
 •	the retrieval of older versions of documents should be done by your system based on the current version and possibly a sequence of history files. 
+
 •	any word(s) belonging to the taboo list (maintained by SU) are replaced by UNK by the system, and the one who use these words are warned automatically, s/he should update the document next time s/he log in the system as the first job (all other activities are blocked)
+
 •	a creative feature worthy of 15% is required for each system, one possible feature could be allowing more than word per line, or speech-based document updating is allowed, or some machine learning features to render this system adaptable/evolving by itself thru usage. 
+
 •	a GUI is required, different users should have their own page populated by his/her picture and 3 most recent documents. For a brand-new user, the 3 most popular (most read and/or updated) files in the system are shown.
