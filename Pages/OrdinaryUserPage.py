@@ -643,25 +643,107 @@ class View_Complaints(Frame):
         self.vc_var = StringVar(self)
 
         if (len(vc_options) != 0):
-            self.variable.set(vc_options[0])
+            self.vc_var.set(vc_options[0])
             w = OptionMenu(self, self.vc_var, *vc_options)
             w.pack(side=TOP)
 
-            self.button1 = Button(self, text = "ok", command=self.)
+            self.button1 = Button(self, text = "ok", command=self.retrieve_complaint_info)
             self.button1.pack(side=TOP)
 
         vc_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
         vc_back_button.pack(side=BOTTOM)
 
-    #in progress
+
     def retrieve_complaints(self):
         f = open('Databases/Complaints/Complaints.json', 'r+')
         rc_complaints = json.load(f)
-        for key in shared_doc_info:
-            if Application.current_logged_in_user in shared_doc_info[key][3]:
-                shared_docs.append(key)
         f.close()
-        return shared_docs
+
+        f2 = open('Databases/Documents/Shared documents.json', 'r+')
+        rc_docs = json.load(f2)
+        f2.close()
+
+        doc_complaints = {}
+        specific_complaints = []
+
+        for key in rc_complaints:
+            if (rc_complaints[key][1] != Application.current_logged_in_user):
+                doc_complaints[key] = rc_complaints[key][0] #retrieves the documents that have a complaint(s)
+        for dc_key in rc_docs:
+            if (dc_key in list(doc_complaints.values())
+            and Application.current_logged_in_user == rc_docs[dc_key][0]):
+                complaint_tuple = list(doc_complaints.items())
+                user = complaint_tuple[0][0]
+                doc = complaint_tuple[0][1]
+                # doc = list(doc_complaints.items())[1]
+                specific_complaints.append(user + " " + doc)
+        return specific_complaints
+
+    def retrieve_complaint_info(self):
+        self.button1['state'] = DISABLED
+        self.selected_complaint = self.vc_var.get()
+        selected_complaint_list = self.selected_complaint.split(" ")
+
+        f = open('Databases/Complaints/Complaints.json', 'r+')
+        complaints = json.load(f)
+        f.close()
+
+        a_complaint = {}
+        a_complaint[selected_complaint_list[0]] = complaints[selected_complaint_list[0]]
+
+        rci_text = Text(self)
+        rci_text.insert(INSERT,"Username: " + selected_complaint_list[0])
+        rci_text.insert(END, '\n')
+        rci_text.insert(INSERT,"Document name: " + a_complaint[selected_complaint_list[0]][0] )
+        rci_text.insert(END, '\n')
+        rci_text.insert(INSERT,"Complaining about: " + a_complaint[selected_complaint_list[0]][1])
+        rci_text.insert(END, '\n')
+        rci_text.insert(INSERT,"Complaint: " + a_complaint[selected_complaint_list[0]][2])
+        rci_text.insert(END, '\n')
+
+        rci_text.config(state=DISABLED)
+        rci_text.pack(side=TOP)
+
+        self.rci_remove_complaint_button = Button(self, text = "Remove Complaint", command=lambda: self.remove_complaint(selected_complaint_list[0]))
+        self.rci_remove_complaint_button.pack(side=TOP)
+
+        self.rci_remove_collaborator_button = Button(self, text = "Remove Collaborator", command=lambda: self.remove_collaborator(selected_complaint_list[0], a_complaint[selected_complaint_list[0]][0], a_complaint[selected_complaint_list[0]][1]))
+        self.rci_remove_collaborator_button.pack(side=TOP)
+
+    def remove_complaint_from_db(self, username,):
+        f = open('Databases/Complaints/Complaints.json', 'r+')
+        complaints = json.load(f)
+        complaints.pop(username)
+        f.seek(0)
+        f.truncate()
+        json.dump(complaints, f)
+        f.close()
+
+    def remove_complaint(self, username):
+        try:
+            if (messagebox.askyesno('Confirm Removal', 'Are you sure you want to remove this complaint?')):
+                self.remove_complaint_from_db(username)
+                messagebox.showinfo('Success', 'The complaint was successfully removed!')
+                self.parent.show_frame(View_Complaints)
+        except:
+            messagebox.showerror('Error', 'Something went wrong!')
+
+    def remove_collaborator(self, username, doc_name, complainee_name):
+        try:
+            if (messagebox.askyesno('Confirm Removal', 'Are you sure you want to remove this collaborator?')):
+                f = open('Databases/Documents/Shared documents.json', 'r+')
+                shared_docs = json.load(f)
+                shared_docs[doc_name][3].remove(complainee_name)
+                f.seek(0)
+                f.truncate()
+                json.dump(shared_docs, f)
+                f.close()
+                self.remove_complaint_from_db(username)
+                messagebox.showinfo('Success', complainee_name + ' was successfully removed from ' + doc_name)
+                self.parent.show_frame(View_Complaints)
+        except:
+            messagebox.showerror('Error', 'Something went wrong!')
+
 
 # class create_new_document(Frame):
 #     def __init__(self, parent):
@@ -801,14 +883,179 @@ class get_info_ou(Frame):
         gio_label1 = Label(self, text = "Interests: ")
         gio_label1.pack(side=TOP)
 
-        self.gio_entry1 = Entry(self, bd =5)
-        self.gio_entry1.pack(side=TOP)
 
-        gio_button0 = Button(self, text = "cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        interest_options = []
+
+        with open('OU.json', 'r') as json_user_data_2:
+            user_data_2 = json.load(json_user_data_2)
+
+        option_list_value = []
+
+        for key, value in user_data_2.items():
+            option_list_value.append(value)
+
+        for entry in option_list_value:
+            for item in entry['Technical interests']:
+                while item not in interest_options:
+                    interest_options.append(item)
+
+
+        for entry1 in option_list_value:
+            for item1 in entry1['Other interests']:
+                while item1 not in interest_options:
+                    interest_options.append(item1)
+
+        interest_options.insert(0, "")
+
+
+        self.variable = StringVar(self)
+        self.variable.set(interest_options[0])
+
+        w = OptionMenu(self, self.variable, *interest_options)
+        w.pack(side=TOP)
+
+        gio_button0 = Button(self, text = "search", command=self.matching_profiles)#command=lambda: parent.show_frame(display_ou_info))
         gio_button0.pack(side=TOP, padx = 6, pady = 4)
 
-        gio_button1 = Button(self, text = "search", command=lambda: parent.show_frame(display_ou_info))
+        gio_button1 = Button(self, text = "cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
         gio_button1.pack(side=TOP, padx = 6, pady = 4)
+
+
+    def matching_profiles(self):
+
+        get_name = self.gio_entry0.get()
+        get_interest1 = self.variable.get()
+
+        with open('OU.json', 'r') as json_user_data_3:
+            user_data_3 = json.load(json_user_data_3)
+
+        dict_list_value = []
+        dict_list_key = []
+
+        for key, value in user_data_3.items():
+            dict_list_value.append(value)
+            dict_list_key.append(key)
+
+        dict_list_names = []
+        dict_list_interests = []
+
+
+        # for loops to get first names and interests (Technical + Other)
+        for entry in dict_list_value:
+            dict_list_names.append(entry['First name'])
+
+        for entry1 in dict_list_value:
+            for item1 in entry1['Technical interests']:
+                while item1 not in dict_list_interests:
+                    dict_list_interests.append(item1)
+
+        for entry2 in dict_list_value:
+            for item2 in entry2['Other interests']:
+                while item2 not in dict_list_interests:
+                    dict_list_interests.append(item2)
+
+        matching_profiles_list = []
+
+        if len(get_name) != 0:
+            for item3 in dict_list_names:
+                if get_name == item3:
+                    matching_profiles_list.append(item3)
+                    break
+                else:
+                    continue
+
+            if get_interest1 != "":
+                for entry in dict_list_value:
+                    if get_interest1 in entry['Technical interests'] or get_interest1 in entry['Other interests']:
+                        matching_profiles_list.append(entry['First name'])
+                        continue
+                    else:
+                        continue
+            else:
+                pass
+        else:
+            if get_interest1 != "":
+                for entry in dict_list_value:
+                    if get_interest1 in entry['Technical interests'] or get_interest1 in entry['Other interests']:
+                        matching_profiles_list.append(entry['First name'])
+                        continue
+                    else:
+                        continue
+            else:
+                pass
+
+
+        self.variable1 = StringVar(self)
+
+        if matching_profiles_list != []:
+            mp_label0 = Label(self, text = "Matching Profiles:")
+            mp_label0.pack(side=TOP, pady = 7)
+            self.variable1.set(matching_profiles_list[0])
+            w = OptionMenu(self, self.variable1, *matching_profiles_list)
+            w.pack(side=TOP, pady = 5)
+            mp_button0 = Button(self, text = 'View Profile', command=self.Display_profile)
+            mp_button0.pack(side=TOP, pady = 2)
+        else:
+            messagebox.showerror("Error", "No profiles found. Try again!")
+
+
+    def Display_profile(self):
+
+        get_match_name = self.variable1.get()
+
+        with open('OU.json', 'r') as json_user_data_4:
+            user_data_4 = json.load(json_user_data_4)
+
+        dict_list_value = []
+        dict_list_key = []
+
+        for key, value in user_data_4.items():
+            dict_list_value.append(value)
+            dict_list_key.append(key)
+
+        T = Text(self, height = 10, width = 70)
+        T.pack(side=TOP, pady = 6)
+
+        for key, value in user_data_4.items():
+            if get_match_name in value.values():
+                T.insert(END, "Username: ")
+                T.insert(END, key)
+            else:
+                continue
+
+
+        for entry in dict_list_value:
+            if get_match_name == entry['First name']:
+
+                T.insert(END, "\nFirst name: ")
+                T.insert(END, entry['First name'])
+
+                # Last name
+                T.insert(END, "\nLast name: ")
+                T.insert(END, entry['Last name'])
+
+                # Email
+                T.insert(END, "\nEmail: ")
+                T.insert(END, entry['Email'])
+
+                # Interests
+                T.insert(END, "\nInterests: ")
+
+                technical_interest_list = []
+                other_interest_list = []
+
+                for item in entry['Technical interests']:
+                    technical_interest_list.append(item)
+
+                for item in entry['Other interests']:
+                    other_interest_list.append(item)
+
+                technical_interest_list.extend(other_interest_list)
+
+                T.insert(END, ', '.join(technical_interest_list))
+
+            else:
+                continue
 
 class display_ou_info(Frame):
     def __init__(self, parent):
