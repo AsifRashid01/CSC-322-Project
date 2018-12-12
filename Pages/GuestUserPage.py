@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import scrolledtext
+from Application import Application
 import sys
 import os
 import json
@@ -12,6 +14,15 @@ class GuestUserPage(Frame):
         Frame.grid_columnconfigure(self, 0, weight=1)
 
         self.parent = parent
+
+        if not os.path.isfile("Databases/Documents/Unshared documents.json"):
+            f = open("Databases/Documents/Unshared documents.json", "w")
+            json.dump({}, f)
+            f.close()
+        if not os.path.isfile("Databases/Documents/Shared documents.json"):
+            f = open("Databases/Documents/Shared documents.json", "w")
+            json.dump({}, f)
+            f.close()
 
         self.welcome_label = Label(self, text='Welcome Guest User', font="Times 25 bold")
         self.welcome_label.pack(padx=15, pady=5)
@@ -120,54 +131,94 @@ class Apply_GU_to_OU(Frame):
 
 class Documents_GU(Frame):
     def __init__(self, parent):
-        Frame.__init__(self, parent, bg='yellow')
+        Frame.__init__(self, parent, bg='grey')
         Frame.pack(self, side="top", fill="both", expand=True)
         Frame.grid_rowconfigure(self, 0, weight=1)
         Frame.grid_columnconfigure(self, 0, weight=1)
 
         self.parent = parent
 
-        # from GuestUserPage import GuestUserPage
-        back_button = Button(self, text="Back to GU Home Page", command=lambda: parent.show_frame(GuestUserPage))
-        back_button.pack(side=BOTTOM)
+        self.back_button = Button(self, text="Back to GU Home Page", command=lambda: parent.show_frame(GuestUserPage))
+        self.back_button.pack(side=BOTTOM)
 
-        yd_label = Label(self, text= "Choose a document")
-        yd_label.pack(side=TOP)
+        docs_label = Label(self, text= "Choose a document")
+        docs_label.pack(side=TOP)
 
-        yd_options = os.listdir(sys.path[0] + "/Document")
+        with open("Databases/Documents/Unshared documents.json", "r") as f:
+            unshared_docs = json.load(f) 
+        
+        doc_options = []
+
+        for key, value in unshared_docs.items():
+            owner = value[0]
+            mode = value[2]
+            if mode == "Open" or mode == "Restricted":
+                doc_options.append(key)
+
         self.variable = StringVar(self)
-        self.variable.set(yd_options[0])
+        if doc_options != []:
+            self.variable.set(doc_options[0])
+            self.w1 = OptionMenu(self, self.variable, *doc_options, command=self.update_info) # selecting a doc updates the info label
+            self.w1.pack(side=TOP)
+        else:
+            self.variable.set('')
+            self.w1 = OptionMenu(self, self.variable, '', command=self.update_info)
+            self.w1.pack(side=TOP)
 
-        w = OptionMenu(self, self.variable, *yd_options)
-        w.pack(side=TOP)
+        self.docinfo_label = Label(self, text="Owner:\nVersion:\nMode:\nRead/update count:", justify=LEFT, font = ("Courier", 11))
+        self.docinfo_label.pack(pady=9, side=TOP)
 
-        self.button1 = Button(self, text='OK', command=self.doc_selection)
-        self.button1.pack(side=TOP)
+        action_options = ["Read"]
 
-    def doc_selection(self):
-        self.button1['state'] = 'disabled'
-        self.Var_get = self.variable.get()
+        self.variable2 = StringVar(self)
+        self.variable2.set("Read")
+        self.w2 = OptionMenu(self, self.variable2, *action_options)
+        self.w2.pack(side=TOP)
 
-        yd_label2 = Label(self, text="What would you like to do?")
-        yd_label2.pack(side=TOP)
+        # initially update frame elements to pertain to first selected document
+        if doc_options != []:
+            self.update_info(doc_options[0])
 
-        yd_options2 = ["Read Doc", "Retrieve older version of Doc", "File complaint about Doc"]
-        variable2 = StringVar(self)
-        variable2.set(yd_options2[0])
+        self.ok_button = Button(self, text='OK', command = self.doc_decision)
+        self.ok_button.pack(side=TOP)
 
-        w = OptionMenu(self, variable2, *yd_options2)
-        w.pack(side=TOP)
+        self.mytext = scrolledtext.ScrolledText(self, font=("Times", 10))
+        self.mytext.pack(expand=TRUE, fill=Y)
+        self.mytext.configure(state="disabled") # initially, the text box is disabled
 
-        self.button2 = Button(self, text='submit', command= self.doc_decision)
-        self.button2.pack(side=TOP)
+    def update_info(self, event):
+        with open("Databases/Documents/Unshared documents.json", "r") as f:
+            unshared_docs = json.load(f)
+
+        if event in unshared_docs: # make sure chosen document is still in unshared docs
+            entry = unshared_docs[event]
+            action_menu = self.w2["menu"]
+
+            if entry[2] == "Open":
+                self.docinfo_label['text'] = 'Owner: {}\nVersion: {}\nMode: {}\n Read/update count: {}'.format(entry[0], entry[1], entry[2], entry[3])
+                action_menu.delete(0, "end")
+                action_menu.add_command(label="Read", command=lambda: self.variable2.set("Read"))
 
     def doc_decision(self):
-        F = open(sys.path[0] + "/Document/" + self.Var_get, "r")
-        a = F.read()
-        print (a)
+        doc_name = self.variable.get()
+        action_name = self.variable2.get()
 
-        yd_label = Label(self, text= a)
-        yd_label.pack(side=TOP)
+        if doc_name == '':
+            return
+
+        if action_name == "Read":
+            with open("Document/" + doc_name + ".txt", "r+") as f:
+                contents = f.read()
+                self.mytext.configure(state="normal")
+                self.mytext.delete(1.0,END)
+                self.mytext.insert(INSERT, contents)
+                self.mytext.configure(state="disabled")
+
+            # increment read/update count
+            with open("Databases/Documents/Unshared documents.json", "r+") as f:
+                unshared_docs = json.load(f)
+                if doc_name in unshared_docs:
+                    unshared_docs[doc_name][3] += 1
 
 class Taboo_Word_Suggestions(Frame):
     def __init__(self, parent):
