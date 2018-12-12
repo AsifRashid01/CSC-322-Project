@@ -360,7 +360,7 @@ class Collab_Documents_OU(Frame):
         Frame.grid_columnconfigure(self, 0, weight=1)
 
         self.parent = parent
-        
+
         back_button = Button(self, text="Back to OU Home Page", command=lambda: parent.show_frame(OrdinaryUserPage))
         back_button.pack(side=BOTTOM)
         docs_label = Label(self, text= "Choose Document")
@@ -420,7 +420,7 @@ class Collab_Documents_OU(Frame):
         with open("Databases/Documents/Shared documents.json", "r") as f:
             shared_docs = json.load(f)
 
-            if document_name in shared_docs: 
+            if document_name in shared_docs:
                 return shared_docs[document_name]
             else: # document could not be found
                 return False
@@ -474,7 +474,7 @@ class Collab_Documents_OU(Frame):
                         formatted_collaborator_list = '  ' + '\n  '.join([ ', '.join(x) for x in zip(doc_info[3][0::4], doc_info[3][1::4],
                                                                                                      doc_info[3][2::4], doc_info[3][3::4]) ]) +\
                                                       ',\n  ' + ', '.join(doc_info[3][-remainder:])
-                                                      
+
                     self.docinfo_label['text'] = ('Owner: {}\nVersion: {}\nMode: Shared\n Collaborators:\n{}\n Lock status: {}'\
                                                  ).format(doc_info[0], doc_info[1], formatted_collaborator_list, doc_info[4])
                 else:
@@ -545,29 +545,85 @@ class File_Complaints(Frame):
         label0 = Label(self, text = "Select Document:")
         label0.pack(side=TOP)
 
-        fc_options = os.listdir(sys.path[0] + "/Document/")
-
+        fc_options = self.retrieve_ous_shared_docs()
         self.variable = StringVar(self)
-        self.variable.set(fc_options[0])
 
-        w = OptionMenu(self, self.variable, *fc_options)
-        w.pack(side=TOP)
+        if (len(fc_options) != 0):
+            self.variable.set(fc_options[0])
+            w = OptionMenu(self, self.variable, *fc_options)
+            w.pack(side=TOP)
 
-        button1 = Button(self, text = "ok", command=self.Complain_About)
-        button1.pack(side=TOP)
+            self.button1 = Button(self, text = "ok", command=self.retrieve_sd_collaborators)
+            self.button1.pack(side=TOP)
 
         cnd_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
         cnd_back_button.pack(side=BOTTOM)
 
-    def Complain_About(self):
-        T = Text(self, height = 3, width = 30)
-        T.pack(side = TOP, pady = 10)
-        T.insert(END, "Write complaint here")
+    def retrieve_ous_shared_docs(self):
+        f = open('Databases/Documents/Shared documents.json', 'r+')
+        shared_doc_info = json.load(f)
+        shared_docs = []
+        for key in shared_doc_info:
+            if Application.current_logged_in_user in shared_doc_info[key][3]:
+                shared_docs.append(key)
+        f.close()
+        return shared_docs
 
-        var1 = Checkbutton(self, text = "Notify owner")
-        var1.pack(side=TOP)
-        button0 = Button(self, text = "Submit")
+    def retrieve_sd_collaborators(self):
+        self.button1['state'] = DISABLED
+        self.selected_doc = self.variable.get()
+        f = open('Databases/Documents/Shared documents.json', 'r+')
+        shared_doc_info = json.load(f)
+        rsc_collaborators = []
+        rsc_collaborators.append(shared_doc_info[self.selected_doc][0])
+
+        for rsc_collaborator in shared_doc_info[self.selected_doc][3]:
+            if (rsc_collaborator != Application.current_logged_in_user):
+                rsc_collaborators.append(rsc_collaborator)
+
+        f.close()
+        fc_collab = rsc_collaborators
+        self.fc_collab_var = StringVar(self)
+
+        if(len(fc_collab) != 0):
+            self.fc_collab_var.set(fc_collab[0])
+            fc_om = OptionMenu(self, self.fc_collab_var, *fc_collab)
+            fc_om.pack(side=TOP)
+            self.rsc_button = Button(self, text = "ok", command=self.Complain_About)
+            self.rsc_button.pack(side=TOP)
+
+    def Complain_About(self):
+        self.rsc_button['state'] = DISABLED
+        self.T = Text(self, height = 3, width = 30)
+        self.T.pack(side = TOP, pady = 10)
+        self.T.insert(END, "Write complaint here")
+
+        button0 = Button(self, text = "Submit", command=self.submit_complaint)
         button0.pack(side=TOP, pady = 5)
+
+    def submit_complaint(self):
+        try:
+            self.selected_collaborator = self.fc_collab_var.get()
+            self.complaint_text = self.T.get(1.0, END)
+            sc_list = []
+            sc_list.append(self.selected_doc)
+            sc_list.append(self.selected_collaborator)
+            sc_list.append(self.complaint_text)
+            f = open('Databases/Complaints/Complaints.json', 'r+')
+            sc_complaint = json.load(f)
+            sc_complaint.update({Application.current_logged_in_user: sc_list})
+            f.seek(0)
+            f.truncate()
+            json.dump(sc_complaint, f)
+            f.close()
+            messagebox.showinfo('Success', 'Your complaint was successfully submitted!')
+            self.parent.show_frame(File_Complaints)
+        except FileNotFoundError:
+            f = open('Databases/Complaints/Complaints.json', 'w')
+            json.dump({}, f)
+            f.close()
+            messagebox.showerror('Error', 'This file does not exist!')
+
 
 # class create_new_document(Frame):
 #     def __init__(self, parent):

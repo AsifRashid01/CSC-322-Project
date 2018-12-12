@@ -22,7 +22,7 @@ class SuperUserPage(Frame):
 
         # Providing buttons for various SU options:
 
-        button0 = Button(fr, text='Documents')  # Providing buttons for various SU options
+        button0 = Button(fr, text='Documents')
         button0.pack(side=TOP, padx=5, pady=5)
 
         button1 = Button(fr, text='View OU Applications', command=lambda: parent.show_frame(ViewApplications))
