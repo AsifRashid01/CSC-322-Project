@@ -1,6 +1,6 @@
 # CSC-322-Project
 
-Hardcoded accounts one can use for testing (username: password): 
+Hardcoded accounts one can use for logging in and testing (username: password): 
 
 SU: "s": "s"
 
