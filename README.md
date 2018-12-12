@@ -1,8 +1,11 @@
 # CSC-322-Project
 
 Hardcoded accounts one can use for testing (username: password): 
+
 SU: "s": "s"
+
 OU: "o": "o"
+
 GU: "g": "g"
 
   We want to develop a document sharing system such that group members can collaborate on the same documents without causing inconsistencies. There are three types of users in this system: Super User (SU), Ordinary User (OU) and Guest (GU). 
