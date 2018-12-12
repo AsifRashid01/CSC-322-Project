@@ -101,19 +101,22 @@ class Apply_GU_to_OU(Frame):
                                                                       "Email": self.agu_entry3.get(),
                                                                       "Technical interests": [self.variable.get(), self.variable2.get()],
                                                                       "Other interests": self.agu_entry5.get()}}
-        try:
-            f = open('Databases/Applications/Applications.json', 'r+')
-            applications = json.load(f)
-            f.seek(0)
+        if (messagebox.askyesno('Confirm Submission', 'Are you sure you want to submit this application?')):
+            try:
+                f = open('Databases/Applications/Applications.json', 'r+')
+                applications = json.load(f)
+                f.seek(0)
 
-            if Application.current_logged_in_user in applications:
-                messagebox.showerror('Error', 'You have already submitted an application, and it is pending.')
-            else:
-                applications.update(formatted_application) # update dictionary with new application
-                json.dump(applications, f) # update json file with updated dictionary
-        except FileNotFoundError:
-            f = open('Databases/Applications/Applications.json', 'w')
-            json.dump(formatted_application, f)
+                if Application.current_logged_in_user in applications:
+                    messagebox.showerror('Error', 'You have already submitted an application, and it is pending.')
+                elif self.agu_entry1.get() == "" or self.agu_entry2.get() == "":
+                    messagebox.showerror('Error', 'Please provide a first and last name!')
+                else:
+                    applications.update(formatted_application) # update dictionary with new application
+                    json.dump(applications, f) # update json file with updated dictionary
+            except FileNotFoundError:
+                f = open('Databases/Applications/Applications.json', 'w')
+                json.dump(formatted_application, f)
 
 class Documents_GU(Frame):
     def __init__(self, parent):
@@ -193,22 +196,23 @@ class Taboo_Word_Suggestions(Frame):
         button2.pack(side=TOP)
 
     def submit_taboo_suggestions(self):
-        try:
-            f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'r+')
-            list_of_suggested_taboos = json.load(f)
+        if (messagebox.askyesno('Confirm Submission', 'Are you sure you want to submit these taboo word suggestions?')):
+            try:
+                f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'r+')
+                list_of_suggested_taboos = json.load(f)
 
-        except FileNotFoundError:
-            f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'w+')
-            json.dump({}, f)
-            list_of_suggested_taboos = {}
+            except FileNotFoundError:
+                f = open('Databases/TabooWordSuggestions/TabooWordSuggestions.json', 'w+')
+                json.dump({}, f)
+                list_of_suggested_taboos = {}
 
-        submission_list = self.tw_entry1.get('1.0', END).split()
+            submission_list = self.tw_entry1.get('1.0', END).split()
 
-        for w in submission_list:
-            if w not in list_of_suggested_taboos:
-                list_of_suggested_taboos[w] = 1
-            else:
-                list_of_suggested_taboos[w] += 1
+            for w in submission_list:
+                if w not in list_of_suggested_taboos:
+                    list_of_suggested_taboos[w] = 1
+                else:
+                    list_of_suggested_taboos[w] += 1
 
-        f.seek(0)
-        json.dump(list_of_suggested_taboos, f)
+            f.seek(0)
+            json.dump(list_of_suggested_taboos, f)

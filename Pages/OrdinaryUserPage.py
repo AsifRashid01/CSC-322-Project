@@ -60,6 +60,9 @@ class OrdinaryUserPage(Frame):
         complain_button = Button(fra, text='File complaints', command=lambda: parent.show_frame(File_Complaints))
         complain_button.pack(side=TOP, padx=10, pady=5)
 
+        view_complaints_button = Button(fra, text='View complaints', command=lambda: parent.show_frame(View_Complaints))
+        view_complaints_button.pack(side=TOP, padx=10, pady=5)
+
         # from Pages.GuestUserPage import Taboo_Word_Suggestions
         suggest_taboo_button = Button(fra, text='Suggest taboo words', command=lambda: parent.show_frame(Taboo_Word_Suggestions_OU))
         suggest_taboo_button.pack(side=TOP, padx=9, pady=5)
@@ -624,6 +627,41 @@ class File_Complaints(Frame):
             f.close()
             messagebox.showerror('Error', 'This file does not exist!')
 
+class View_Complaints(Frame):
+    def __init__(self, parent):
+        Frame.__init__(self, parent, bg='yellow')
+        Frame.pack(self, side="top", fill="both", expand=True)
+        Frame.grid_rowconfigure(self, 0, weight=1)
+        Frame.grid_columnconfigure(self, 0, weight=1)
+
+        self.parent = parent
+
+        label0 = Label(self, text = "View Complaints:")
+        label0.pack(side=TOP)
+
+        vc_options = self.retrieve_complaints()
+        self.vc_var = StringVar(self)
+
+        if (len(vc_options) != 0):
+            self.variable.set(vc_options[0])
+            w = OptionMenu(self, self.vc_var, *vc_options)
+            w.pack(side=TOP)
+
+            self.button1 = Button(self, text = "ok", command=self.)
+            self.button1.pack(side=TOP)
+
+        vc_back_button = Button(self, text="Cancel", command=lambda: parent.show_frame(OrdinaryUserPage))
+        vc_back_button.pack(side=BOTTOM)
+
+    #in progress
+    def retrieve_complaints(self):
+        f = open('Databases/Complaints/Complaints.json', 'r+')
+        rc_complaints = json.load(f)
+        for key in shared_doc_info:
+            if Application.current_logged_in_user in shared_doc_info[key][3]:
+                shared_docs.append(key)
+        f.close()
+        return shared_docs
 
 # class create_new_document(Frame):
 #     def __init__(self, parent):
