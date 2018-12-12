@@ -5,6 +5,8 @@ Username: s
 
 Password: s
 
+(Similarly, you can log in as an OU with 'o' and 'o' and as a GU with 'g' and 'g'.
+
   We want to develop a document sharing system such that group members can collaborate on the same documents without causing inconsistencies. There are three types of users in this system: Super User (SU), Ordinary User (OU) and Guest (GU). 
   
 SU:
