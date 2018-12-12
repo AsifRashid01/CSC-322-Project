@@ -38,9 +38,9 @@ OU:
 
 GU:
 
-- [ ] read open document(s), retrieve old version(s) of open document(s) and complains about those documents.
-- [ ] send suggestions to SU about taboo words
-- [ ] apply to be an OU that is to be confirmed or rejected by SU, in the application his/her name, technical interests should 
+- [x] read open document(s), retrieve old version(s) of open document(s) and complains about those documents.
+- [x] send suggestions to SU about taboo words
+- [x] apply to be an OU that is to be confirmed or rejected by SU, in the application his/her name, technical interests should 
       be submitted.
 
 constraints:
