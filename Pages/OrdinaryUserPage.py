@@ -105,7 +105,7 @@ class Other_Documents(Frame):
         self.back_button = Button(self, text="Back to OU Home Page", command=lambda: parent.show_frame(OrdinaryUserPage))
         self.back_button.pack(side=BOTTOM)
 
-        docs_label = Label(self, text= "Choose Document")
+        docs_label = Label(self, text= "Choose a document")
         docs_label.pack(side=TOP)
 
         self.bot = Frame(self) # frame in which 'Save' button will appear if the user requests to edit a doc
@@ -262,7 +262,7 @@ class Your_Documents_OU(Frame):
 
         action_label = Label(self, text="What would you like to do?")
         action_label.pack(side=TOP, padx=5, pady=5)
-        action_options = ["Read", "Lock", "Edit", "Unlock", "Change mode", "Retrieve previous versions"]
+        action_options = ["Read", "Lock", "Edit", "Unlock", "Change mode", "Retrieve previous version"]
 
         self.variable2 = StringVar(self)
         self.variable2.set(action_options[0])
@@ -270,7 +270,7 @@ class Your_Documents_OU(Frame):
         self.w2.pack(side=TOP)
 
         self.top = Frame(self) # frame in which a third optionmenu may later appear (right below the second optionmenu)
-        self.top.pack(side=TOP)
+        self.top.pack(side=LEFT)
 
         # update info label and action menu for the first time
         if doc_options != []:
@@ -288,6 +288,11 @@ class Your_Documents_OU(Frame):
         collaborator_label.pack(side=TOP)
         self.collaborator_entry = Entry(self)
         self.collaborator_entry.pack(side=TOP)
+
+        hist_label = Label(self, text="Specify a version number:")
+        hist_label.pack(side=TOP)
+        self.hist_entry = Entry(self)
+        self.hist_entry.pack(side=TOP)
 
         self.mytext = scrolledtext.ScrolledText(self, font=("Times", 10))
         self.mytext.pack(expand=TRUE, fill=Y)
@@ -338,7 +343,7 @@ class Your_Documents_OU(Frame):
                 action_menu.delete(0, "end")
                 new_actions = ["Read", "Find specified keyword", "Lock", "Edit", "Unlock",
                                "Change mode to open", "Change mode to private", "Change mode to restricted", "Change mode to shared",
-                               "Retrieve previous versions", "Invite specified user to collaborate", "Remove specified collaborator"]
+                               "Retrieve previous version", "Invite specified user to collaborate", "Remove specified collaborator"]
                 for act in new_actions:
                     action_menu.add_command(label=act, command=lambda value=act: self.variable2.set(value))
             else:
@@ -347,7 +352,7 @@ class Your_Documents_OU(Frame):
 
                 action_menu.delete(0, "end")
                 new_actions = ["Read", "Find specified keyword", "Edit", "Change mode to open", "Change mode to private",
-                               "Change mode to restricted", "Change mode to shared", "Retrieve previous versions"]
+                               "Change mode to restricted", "Change mode to shared", "Retrieve previous version"]
                 for act in new_actions:
                     action_menu.add_command(label=act, command=lambda value=act: self.variable2.set(value))
 
@@ -441,7 +446,33 @@ class Your_Documents_OU(Frame):
         elif action_name == "Change mode to shared":
             self.change_mode(doc_name, "Shared")
 
-     #   elif action_name == "Retrieve previous versions":
+        elif action_name == "Retrieve previous version":
+            doc_name = self.variable.get()
+            old_version = self.hist_entry.get()
+
+            if doc_name == '' or old_version == '':
+                return
+###########
+            history_folder = os.listdir("History files")
+            history_files = [m for m in history_folder if re.match(doc_name + "_" + "[0-9]+" + ".h", m)]
+
+            with open("Databases/Documents/Shared documents.json", "r") as f, open("Databases/Documents/Unshared documents.json") as g:
+                shared_docs = json.load(f)
+                unshared_docs = json.load(g)
+
+            if doc_name in shared_docs:
+                current_version = shared_docs[doc_name][1]
+            elif doc_name in unshared_docs:
+                current_version = unshared_docs[doc_name][1]
+
+            editdistance = Edit()
+
+            try:
+               while current_version != old_version:
+                   editdistance.restore_file(list_of_ops, list_of_lines)
+                    
+            except:
+                messagebox.showerror("Error", "Something went wrong")
 
         elif action_name == "Find specified keyword":
             keyword = self.keyword_entry.get()
@@ -667,7 +698,7 @@ class Collab_Documents_OU(Frame):
 
         action_label = Label(self, text="What would you like to do?")
         action_label.pack(side=TOP, padx=5, pady=5)
-        action_options = ["Read", "Lock", "Edit", "Unlock", "Retrieve previous versions"]
+        action_options = ["Read", "Lock", "Edit", "Unlock", "Retrieve previous version"]
 
         self.variable2 = StringVar(self)
         self.variable2.set(action_options[0])
@@ -794,7 +825,7 @@ class Collab_Documents_OU(Frame):
                 else:
                     messagebox.showerror("Hmmm", "Someone else is updating this document.")
 
-        elif action_name == "Retrieve previous versions":
+        elif action_name == "Retrieve previous version":
             history_folder = os.listdir("History files")
             options = [m for m in history_folder if re.match(doc_name + "_" + "[0-9]+" + ".h", m)]
 
@@ -803,36 +834,13 @@ class Collab_Documents_OU(Frame):
             if options != []:
                 self.var1.set(options[0])
                 
-                self.om = OptionMenu(self.top, self.var1, *options, command=self.generate_history())
+                self.om = OptionMenu(self.top, self.var1, *options)
                 self.om.pack()
             else:
                 self.var1.set('')
                 self.om = OptionMenu(self, self.var1, '')
                 self.om.pack()
 
-
-    def generate_history(self):
-        history_file_name = self.var1.get()
-        previous_version = history_file_name.rsplit('_', 1)[1][:-2] # file_234.h -> 234.h -> 234
-        doc_name = self.variable.get()
-        with open("Document/" + doc_name + ".txt", "r") as f:
-            contents = f.readlines()
-        current_version = self.document_info(doc_name)[1]
-
-        editdistance = Edit()
-
-        while current_version != previous_version:
-            try:
-                with open("History files/" + doc_name + "_" + str(current_version-1) + ".h", "r") as f:
-                    list_of_ops = f.readlines(); print(list_of_ops)
-
-                contents = editdistance.restore_file(list_of_ops, contents)
-            except:
-                messagebox.showerror("Error", "History file(s) missing")
-                break
-            current_version -= 1
-
-        print(contents)
 
     def save_doc(self, doc_name):
         # get user input and write it
@@ -889,7 +897,7 @@ class Recent_Documents_OU(Frame):
 
         rd_label0 = Label(self, text="What would you like to do?")
         rd_label0.pack(side=TOP)
-        rd_options = ["Read", "Edit", "Retrieve older versions", "Change privacy setting", "Lock document", "Unlock document", "Remove collaborator"]
+        rd_options = ["Read", "Edit", "Retrieve previous version", "Change privacy setting", "Lock document", "Unlock document", "Remove collaborator"]
         variable = StringVar(self)
         variable.set(rd_options[0])
         w = OptionMenu(self, variable, *rd_options)
