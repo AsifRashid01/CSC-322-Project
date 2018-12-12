@@ -1,5 +1,11 @@
 # CSC-322-Project
+The super user's login information is hardcoded as follows:
 
+Username: s
+
+Password: s
+
+(Similarly, you can log in as an OU with 'o' and 'o' and as a GU with 'g' and 'g'; although you can also create your own guest account and stop there or continue by submitting an application and then accepting it as the super user to promote yourself to an OU.)
 
   We want to develop a document sharing system such that group members can collaborate on the same documents without causing inconsistencies. There are three types of users in this system: Super User (SU), Ordinary User (OU) and Guest (GU). 
   
@@ -32,9 +38,9 @@ OU:
 
 GU:
 
-- [ ] read open document(s), retrieve old version(s) of open document(s) and complains about those documents.
-- [ ] send suggestions to SU about taboo words
-- [ ] apply to be an OU that is to be confirmed or rejected by SU, in the application his/her name, technical interests should 
+- [x] read open document(s), retrieve old version(s) of open document(s) and complains about those documents.
+- [x] send suggestions to SU about taboo words
+- [x] apply to be an OU that is to be confirmed or rejected by SU, in the application his/her name, technical interests should 
       be submitted.
 
 constraints:
