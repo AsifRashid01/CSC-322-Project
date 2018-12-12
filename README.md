@@ -1,12 +1,9 @@
 # CSC-322-Project
+The super user's login information is hardcoded as follows:
 
-Hardcoded accounts one can use for logging in and testing (username: password): 
+Username: s
 
-SU: "s": "s"
-
-OU: "o": "o"
-
-GU: "g": "g"
+Password: s
 
   We want to develop a document sharing system such that group members can collaborate on the same documents without causing inconsistencies. There are three types of users in this system: Super User (SU), Ordinary User (OU) and Guest (GU). 
   
