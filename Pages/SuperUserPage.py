@@ -257,20 +257,21 @@ class ViewTabooWords(Frame):
         added_taboo_word = self.vtw_add_entry.get()
         if( len(added_taboo_word) < 1 ):
             messagebox.showerror('Error', 'Please enter a word!')
-        try:
-            f = open('Databases/TabooWords/TabooWords.json', 'r+')
-            taboo_words = json.load(f)
-            if added_taboo_word in taboo_words:
-                messagebox.showwarning("Warning", added_taboo_word + " already exists in the taboo words list!")
-            else:
-                taboo_words.append(added_taboo_word)
-                f.seek(0)
-                f.truncate()
-                json.dump(taboo_words, f)
-                f.close()
-            self.parent.show_frame(ViewTabooWords)
-        except:
-            messagebox.showerror('Error', 'An error occurred!')
+        else:
+            try:
+                f = open('Databases/TabooWords/TabooWords.json', 'r+')
+                taboo_words = json.load(f)
+                if added_taboo_word in taboo_words:
+                    messagebox.showwarning("Warning", added_taboo_word + " already exists in the taboo words list!")
+                else:
+                    taboo_words.append(added_taboo_word)
+                    f.seek(0)
+                    f.truncate()
+                    json.dump(taboo_words, f)
+                    f.close()
+                self.parent.show_frame(ViewTabooWords)
+            except:
+                messagebox.showerror('Error', 'An error occurred!')
 
     def remove_taboo_word(self):
         try:
@@ -299,15 +300,8 @@ class ViewSuggestedTabooWords(Frame):
 
         self.parent = parent
 
-        vstw_label = Label(self, text= "Taboo Words")
+        vstw_label = Label(self, text= "Suggested Taboo Words")
         vstw_label.pack(side=TOP)
-
-        # frame = Frame(master)
-        # scrollbar = Scrollbar(frame, orient=VERTICAL)
-        # listbox = Listbox(frame, yscrollcommand=scrollbar.set)
-        # scrollbar.config(command=listbox.yview)
-        # scrollbar.pack(side=RIGHT, fill=Y)
-        # listbox.pack(side=LEFT, fill=BOTH, expand=1)
 
         vstw_list = self.retrieve_taboo_word_suggestions()
         self.vstw_lb = Listbox(self)
@@ -384,16 +378,58 @@ class RemoveOU(Frame):
 
         rou_label = Label(self, text= "Choose an OU")
         rou_label.pack(side=TOP)
-        rou_OUS = ["OU 1", "OU 2", "OU 3"]
+
+        rou_OUS = self.retrieve_OUs()
         self.rou_var = StringVar(self)
-        self.rou_var.set(rou_OUS[0])
-        vc_om = OptionMenu(self, self.rou_var, *rou_OUS)
-        vc_om.pack(side=TOP)
-        vc_ok_button = Button(self, text='remove')
-        vc_ok_button.pack(side=TOP)
+        if (len(rou_OUS) != 0):
+            self.rou_var.set(rou_OUS[0])
+            vc_om = OptionMenu(self, self.rou_var, *rou_OUS)
+            vc_om.pack(side=TOP)
+
+            vc_ok_button = Button(self, text='remove', command=self.remove_ou_from_ou_db)
+            vc_ok_button.pack(side=TOP)
 
         rou_cancel_button = Button(self, text='Cancel', command=lambda: parent.show_frame(SuperUserPage))
         rou_cancel_button.pack(side=TOP)
+
+    def retrieve_OUs(self):
+        try:
+            f = open('Databases/Users/OU.json', 'r+')
+            OUs = json.load(f)
+            list_of_OUs = list(OUs.keys())
+            f.close()
+            return list_of_OUs
+        except FileNotFoundError:
+            messagebox.showerror('Error', 'This file does not exist!')
+
+    def remove_ou_from_ou_db(self):
+        selected_ou = self.rou_var.get()
+        if (messagebox.askyesno('Confirm Removal', 'Are you sure you want to remove ' + selected_ou + ' ?')):
+            try:
+                f = open('Databases/Users/OU.json', 'r+')
+                OUs = json.load(f)
+                user_pass = OUs[selected_ou]["password"]
+                OUs.pop(selected_ou)
+                f.seek(0)
+                f.truncate()
+                json.dump(OUs, f, sort_keys=True)
+                f.close()
+                self.add_ou_to_gu_db(selected_ou, user_pass)
+                self.parent.show_frame(RemoveOU)
+            except:
+                messagebox.showerror('Error', 'Something went wrong!')
+
+    def add_ou_to_gu_db(self, ou_username, ou_password):
+        try:
+            f = open('Databases/Users/GU.json', 'r+')
+            GUs = json.load(f)
+            GUs[ou_username] = ou_password
+            f.seek(0)
+            f.truncate()
+            json.dump(GUs, f, sort_keys=True)
+            f.close()
+        except:
+            messagebox.showerror('Error', 'Something went wrong!')
 
 class Your_Documents_SU(Frame):
     def __init__(self, parent):
