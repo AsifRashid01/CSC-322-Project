@@ -931,7 +931,7 @@ class File_Complaints(Frame):
         shared_doc_info = json.load(f)
         shared_docs = []
         for key in shared_doc_info:
-            if Application.current_logged_in_user in shared_doc_info[key][3]:
+            if Application.current_logged_in_user in shared_doc_info[key][4]:
                 shared_docs.append(key)
         f.close()
         return shared_docs
@@ -944,7 +944,7 @@ class File_Complaints(Frame):
         rsc_collaborators = []
         rsc_collaborators.append(shared_doc_info[self.selected_doc][0])
 
-        for rsc_collaborator in shared_doc_info[self.selected_doc][3]:
+        for rsc_collaborator in shared_doc_info[self.selected_doc][4]:
             if (rsc_collaborator != Application.current_logged_in_user):
                 rsc_collaborators.append(rsc_collaborator)
 
@@ -1074,7 +1074,7 @@ class View_Complaints(Frame):
         self.rci_remove_collaborator_button = Button(self, text = "Remove Collaborator", command=lambda: self.remove_collaborator(selected_complaint_list[0], a_complaint[selected_complaint_list[0]][0], a_complaint[selected_complaint_list[0]][1]))
         self.rci_remove_collaborator_button.pack(side=TOP)
 
-    def remove_complaint_from_db(self, username,):
+    def remove_complaint_from_db(self, username):
         f = open('Databases/Complaints/Complaints.json', 'r+')
         complaints = json.load(f)
         complaints.pop(username)
@@ -1097,7 +1097,7 @@ class View_Complaints(Frame):
             if (messagebox.askyesno('Confirm Removal', 'Are you sure you want to remove this collaborator?')):
                 f = open('Databases/Documents/Shared documents.json', 'r+')
                 shared_docs = json.load(f)
-                shared_docs[doc_name][3].remove(complainee_name)
+                shared_docs[doc_name][4].remove(complainee_name)
                 f.seek(0)
                 f.truncate()
                 json.dump(shared_docs, f)
